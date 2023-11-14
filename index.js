@@ -11,8 +11,8 @@ const swaggerUi = require("swagger-ui-express");
 const dbconnect = require("./Config/dbConfig")
 dbconnect.dbconnect()
 
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+app.use(express.json({limit:"20mb"}))
+app.use(express.urlencoded({limit:"20mb",extended:true}))
 
 const options = {
     definition: {
@@ -50,6 +50,12 @@ app.use(
 
 const userRoute = require("./Routes/userRoutes")
 app.use("/", userRoute)
+
+const doctorRoute = require("./Routes/doctorRoutes")
+app.use("/doctor", doctorRoute)
+
+const adminRoute = require("./Routes/adminRoutes")
+app.use("/admin",adminRoute)
 
 
 app.listen(PORT,()=>{

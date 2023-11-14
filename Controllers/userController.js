@@ -14,9 +14,9 @@ const userRegistration = async (req, res) => {
     try {
         const { name, mobile, email, password1, password2 } = req.body
 
-        if (password1 !== password2) {
-            res.json({ userData, alert: "Registration falied", status: false })
-        }
+        // if (password1 !== password2) {
+        //     res.json({ userData, alert: "Registration falied", status: false })
+        // }
 
         const spassword = await securePassword(password1)
         const emailExist = await User.findOne({ email: email })
@@ -48,8 +48,9 @@ const userRegistration = async (req, res) => {
 //user otp verifying
 const otpVerify = async (req, res) => {
     try {
-        const { otp, otpId, userId } = req.body
+        const { otp, userId } = req.body
         const otpData = await Otp.find({ userId: userId })
+        
         const { expiresAt } = otpData[otpData.length - 1];
         const correctOtp = otpData[otpData.length - 1].otp;
         if (otpData && expiresAt < Date.now()) {
@@ -109,11 +110,11 @@ const userLogin = async (req, res) => {
                 if (emailExist.is_blocked === false) {
                     const passCheck = await bcrypt.compare(password, emailExist.password)
                     if (passCheck) {
-                        const token = jwt.sign({ userId: emailExist._id }, process.env.SECRET_KEY_USER, { expiresIn: "1h" })
-                        res.header('token', token);
+                        const usertoken = jwt.sign({ userId: emailExist._id }, process.env.SECRET_KEY_USER, { expiresIn: "1h" })
+                        res.header('usertoken', usertoken);
 
                         // res.json({ userData: emailExist, token, status: true })
-                        res.status(200).json({ userData: emailExist, token, message: `Welome ${emailExist.name}` });
+                        res.status(200).json({ userData: emailExist, usertoken, message: `Welome ${emailExist.name}` });
                     } else {
                         // res.json({ alert: "password is incorrect" })
                         return res.status(401).json({
@@ -134,7 +135,7 @@ const userLogin = async (req, res) => {
             }
 
         } else {
-            return res.status(404).json({ message: "User not registered" });
+            return res.status(400).json({ message: "User not registered" });
         }
 
     } catch (error) {
