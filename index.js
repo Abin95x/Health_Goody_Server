@@ -43,7 +43,7 @@ const options = {
 app.use(
     cors({
       origin: "http://localhost:3000",
-      methods: ["GET", "POST"],
+      methods: ["GET", "POST","PUT","PATCH"],
       credentials: true, // Set to true if you need to include credentials
     })
 );
