@@ -13,7 +13,7 @@ let otpId
 
 const doctorRegistration = async (req, res) => {
     try {
-        const { name, mobile, email, speciality, password1, password2, photo, certificates } = req.body
+        const { name, mobile, email, speciality, password1, photo, certificates } = req.body
         const spassword = await securePassword(password1)
         const emailExist = await Doctor.findOne({ email: email })
         if (emailExist) {
@@ -64,7 +64,7 @@ const otpVerify = async (req, res) => {
     try {
         const { otp, doctorId } = req.body
         const otpData = await Otp.find({ doctorId: doctorId })
-        
+
         const { expiresAt } = otpData[otpData.length - 1];
         const correctOtp = otpData[otpData.length - 1].otp;
         if (otpData && expiresAt < Date.now()) {
@@ -116,14 +116,13 @@ const resendOtp = async (req, res) => {
 
 
 
-const doctorLogin = async (req,res) => {
+const doctorLogin = async (req, res) => {
     try {
         const { email, password } = req.body
         const emailExist = await Doctor.findOne({ email: email })
         console.log(emailExist)
         if (emailExist) {
             if (emailExist.otp_verified) {
-                //need to check admin is approved
                 if (emailExist.is_blocked === false) {
                     const passCheck = await bcrypt.compare(password, emailExist.password)
                     console.log(passCheck)
@@ -131,27 +130,32 @@ const doctorLogin = async (req,res) => {
                         const doctortoken = jwt.sign({ doctorId: emailExist._id }, process.env.SECRET_KEY_DOCTOR, { expiresIn: "1h" })
                         res.header('doctortoken', doctortoken);
                         console.log(doctortoken)
-
                         res.status(200).json({ doctorData: emailExist, doctortoken, message: `Welome ${emailExist.name}` });
-                        
 
                     } else {
-                        return res.status(401).json({
+                        res.status(401).json({
                             message: "password is incorrect"
                         });
                     }
                 } else {
-                    return res.status(403).json({
+                    res.status(403).json    ({
                         message: "doctor is blocked by admin"
                     });
                 }
             } else {
-                return res.status(401).json({
+                otpId = await sendEmail(
+                    emailExist.name,
+                    emailExist.email,
+                    emailExist._id,
+                )
+
+                res.status(403).json({
                     message: "Email is not verified",
-                    status: false
+                    status: false,
+                    otpId: otpId,
                 });
             }
-        }else{
+        } else {
             return res.status(404).json({ message: "Doctor not registered" });
         }
 

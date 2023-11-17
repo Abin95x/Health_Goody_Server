@@ -1,26 +1,27 @@
 const express = require("express")
 const AdminRoute = express()
 const adminController = require("../Controllers/adminController")
+const auth = require("../Middlewares/adminAuth")
 
 AdminRoute.post("/adminLogin",adminController.adminLogin)
 
 //user
 
-AdminRoute.get("/userList",adminController.userList)
+AdminRoute.get("/userList",auth.authenticateAdmin,adminController.userList)
 
-AdminRoute.post("/userDetails",adminController.userDetails)
+AdminRoute.post("/userDetails",auth.authenticateAdmin,adminController.userDetails)
 
-AdminRoute.post("/blockUnblock",adminController.blockUnblock)
+AdminRoute.post("/blockUnblock",auth.authenticateAdmin,adminController.blockUnblock)
 
 // doctor
 
-AdminRoute.get("/doctorList",adminController.doctorList)
+AdminRoute.get("/doctorList",auth.authenticateAdmin,adminController.doctorList)
 
-AdminRoute.post("/doctorDetails",adminController.doctorDetails)
+AdminRoute.post("/doctorDetails",auth.authenticateAdmin,adminController.doctorDetails)
 
-AdminRoute.get("/unVerifiedList",adminController.unVerified)
+AdminRoute.get("/unVerifiedList",auth.authenticateAdmin,adminController.unVerified)
 
-AdminRoute.patch("/doctorblockUnblock",adminController.blockApprove)
+AdminRoute.patch("/doctorblockUnblock",auth.authenticateAdmin,adminController.blockApprove)
 
 
 

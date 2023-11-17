@@ -49,7 +49,6 @@ const userList = async (req, res) => {
 const userDetails = async (req, res) => {
     try {
         const { id } = req.body
-
         const details = await User.findOne({ _id: id })
 
         res.status(200).json({ details })
@@ -63,11 +62,8 @@ const userDetails = async (req, res) => {
 const blockUnblock = async (req, res) => {
     try {
         const { id } = req.body
-
         const user = await User.findOne({ _id: id })
-
         const blocked = user.is_blocked
-
 
         if (blocked) {
             user.is_blocked = false;
@@ -76,6 +72,8 @@ const blockUnblock = async (req, res) => {
             user.is_blocked = true;
             await user.save();
         }
+        res.status(200).json({ user });
+        
 
     } catch (error) {
         console.log(error.message)
@@ -142,6 +140,7 @@ const blockApprove = async(req,res) =>{
             doctor.is_blocked = true;
             await doctor.save();
         }
+        res.status(200).json({ doctor });
 
 
 

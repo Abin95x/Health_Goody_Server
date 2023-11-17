@@ -29,10 +29,6 @@ const doctorSchema = new mongoose.Schema({
         type: Array,
         required: true
     },
-    // admin_verifed:{
-    //     type:Boolean,
-    //     default:false
-    // },
     otp_verified: {
         type: Boolean,
         default: false

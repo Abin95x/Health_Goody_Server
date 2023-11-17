@@ -1,6 +1,6 @@
 const express = require("express")
 const userRoute = express()
-const auth = require("../Middlewares/userAuth")
+const authUser = require("../Middlewares/userAuth")
 const userController = require("../Controllers/userController")
 console.log("route logged")
 
@@ -69,7 +69,6 @@ userRoute.post("/otpVerify",userController.otpVerify)
 
 
 userRoute.post("/resendOtp",userController.resendOtp)
-
 
 
 /**
