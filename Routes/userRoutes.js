@@ -123,6 +123,16 @@ userRoute.post("/resendOtp",userController.resendOtp)
 userRoute.post("/userLogin",userController.userLogin)
 
 
+userRoute.post("/setDetails",authUser.authenticateUser,userController.setDetails)
+
+userRoute.get('/profileData/:id',authUser.authenticateUser,userController.getProfileData)
+
+userRoute.get("/doctorList",authUser.authenticateUser,userController.doctorList)
+
+userRoute.get("/doctorDetails/:id",authUser.authenticateUser,userController.doctorDetails)
+
+
+
 
 
 

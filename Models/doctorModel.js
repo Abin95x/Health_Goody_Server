@@ -25,10 +25,12 @@ const doctorSchema = new mongoose.Schema({
         type:String,
         required: true
     },
-    cerificates:{
-        type: Array,
-        required: true
-    },
+    cerificates:[
+        {
+            type:String,
+            required:true
+        }
+    ],
     otp_verified: {
         type: Boolean,
         default: false
@@ -37,6 +39,21 @@ const doctorSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    languages:[
+        {
+            type:String
+        }
+    ],
+    experiance: {
+        type: String,
+    },
+    bio: {
+        type: String,
+    },
+    rating:{
+        type: Number
+    }
+
 
 })
 

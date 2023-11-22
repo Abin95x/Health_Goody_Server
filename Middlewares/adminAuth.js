@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken');
 
 const authenticateAdmin = (req, res, next) => {
-  const token = req.headers.authorization      // Assuming you send the token in the 'x-auth-token' header
+  const token = req.headers.authorization   
    console.log("token--3333-",token)
   if (!token) {
     return res.status(401).json({ message: 'Access denied. No token provided.' });

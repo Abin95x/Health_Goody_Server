@@ -4,7 +4,10 @@ require("dotenv").config()
 const sendEmail = require("../utils/nodeMailer.js")
 const securePassword = require("../utils/securePassword.js")
 const User = require("../Models/userModel")
+const Doctor = require("../Models/doctorModel.js")
 const Otp = require("../Models/userOtpModel.js")
+const cloudinary = require("../utils/cloudinary.js")
+
 
 let otpId
 
@@ -12,27 +15,23 @@ let otpId
 //user signup
 const userRegistration = async (req, res) => {
     try {
-        const { name, mobile, email, password1, password2 } = req.body
-
-        // if (password1 !== password2) {
-        //     res.json({ userData, alert: "Registration falied", status: false })
-        // }
+        const { name, mobile, email, password1, photo } = req.body
 
         const spassword = await securePassword(password1)
         const emailExist = await User.findOne({ email: email })
         if (emailExist) {
             res.json({ alert: "This email is already exist", status: false })
         } else {
+            const photoResult = await cloudinary.uploader.upload(photo, { folder: 'doctorPhotos' });
             const user = new User({
                 name: name,
                 email: email,
                 mobile: mobile,
                 password: spassword,
+                photo: photoResult.secure_url
             })
-
             const userData = await user.save()
             otpId = await sendEmail(userData.name, userData.email, userData.id);
-            // res.json({ userData, alert: "Registration", status: true, otpId: otpId, })
             res.status(201).json({
                 status: true,
                 userData,
@@ -50,7 +49,7 @@ const otpVerify = async (req, res) => {
     try {
         const { otp, userId } = req.body
         const otpData = await Otp.find({ userId: userId })
-        
+
         const { expiresAt } = otpData[otpData.length - 1];
         const correctOtp = otpData[otpData.length - 1].otp;
         if (otpData && expiresAt < Date.now()) {
@@ -81,7 +80,6 @@ const otpVerify = async (req, res) => {
 const resendOtp = async (req, res) => {
     try {
         const { userId } = req.body
-        console.log(userId, "ooooooooooooooooooooo");
         const { id, name, email } = await User.findById({ _id: userId })
         const otpId = sendEmail(name, email, id)
         if (otpId) {
@@ -92,7 +90,7 @@ const resendOtp = async (req, res) => {
 
     } catch (error) {
         console.log(error.message);
-        return res
+        res
             .status(500)
             .json({ message: "Failed to send OTP. Please try again later." });
     }
@@ -117,38 +115,104 @@ const userLogin = async (req, res) => {
                         res.status(200).json({ userData: emailExist, usertoken, message: `Welome ${emailExist.name}` });
                     } else {
                         // res.json({ alert: "password is incorrect" })
-                        return res.status(401).json({
+                        res.status(401).json({
                             message: "password is incorrect"
                         });
                     }
                 } else {
-                    return res.status(403).json({
+                    res.status(403).json({
                         message: "User is blocked by admin"
                     });
                 }
 
             } else {
-                return res.status(401).json({
+                res.status(401).json({
                     message: "Email is not verified",
                     status: false
                 });
             }
 
         } else {
-            return res.status(400).json({ message: "User not registered" });
+            res.status(400).json({ message: "User not registered" });
         }
 
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+const setDetails = async (req, res) => {
+    try {
+        const { name, age, gender, mobile, _id } = req.body
+        console.log(req.body)
+        console.log(_id,'rtrtrt')
+        console.log(name,'hgghhh')
+
+        const user = await User.findOneAndUpdate({ _id: _id }, { $set: { name: name, age: age, gender: gender, mobile: mobile } }, { new: true });
+        console.log(user, "user")
+        res.status(200).json({ message: "User details updated successfully", user });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+
+const doctorList = async (req, res) => {
+    try {
+        const doctors = await Doctor.find({ is_blocked: false })
+        res.status(200).json({ doctors })
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
+
+const getProfileData = async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log(id, "id");
+
+      const user = await User.findOne({ _id: id });
+  
+      res.status(200).json({ user });
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };
+  
+
+
+const doctorDetails = async (req, res) => {
+    try {
+        const { id } = req.params
+        console.log(id, "params")
+
+
+        const details = await Doctor.findOne({ _id: id })
+
+        res.status(200).json({ details })
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
 
 
 module.exports = {
     userRegistration,
     otpVerify,
     resendOtp,
-    userLogin
+    userLogin,
+    setDetails,
+    doctorList,
+    doctorDetails,
+    getProfileData
 }
 

@@ -119,13 +119,14 @@ const resendOtp = async (req, res) => {
 const doctorLogin = async (req, res) => {
     try {
         const { email, password } = req.body
+        console.log("1")
         const emailExist = await Doctor.findOne({ email: email })
-        console.log(emailExist)
+        // console.log(emailExist,"oooooooooooooooooooooooooooooooooo")
         if (emailExist) {
             if (emailExist.otp_verified) {
                 if (emailExist.is_blocked === false) {
                     const passCheck = await bcrypt.compare(password, emailExist.password)
-                    console.log(passCheck)
+                    // console.log(passCheck,"oooooooooooooooooooooooooooooooooooooooooo")
                     if (passCheck) {
                         const doctortoken = jwt.sign({ doctorId: emailExist._id }, process.env.SECRET_KEY_DOCTOR, { expiresIn: "1h" })
                         res.header('doctortoken', doctortoken);
@@ -139,7 +140,7 @@ const doctorLogin = async (req, res) => {
                     }
                 } else {
                     res.status(403).json    ({
-                        message: "doctor is blocked by admin"
+                        message: "admin needs to verify you"
                     });
                 }
             } else {
@@ -166,9 +167,12 @@ const doctorLogin = async (req, res) => {
 }
 
 
+
 module.exports = {
     doctorRegistration,
     otpVerify,
     resendOtp,
-    doctorLogin
+    doctorLogin,
+  
+
 }

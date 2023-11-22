@@ -114,7 +114,8 @@ const doctorDetails = async (req, res) => {
 
 const unVerified = async (req, res) => {
     try {
-        const doctors = await Doctor.find({ is_blocked: true })
+        const doctors = await Doctor.find({ is_blocked: true, otp_verified: true });
+
         res.status(200).json({ doctors })
 
     } catch (error) {

@@ -12,4 +12,5 @@ DoctorRoute.post("/doctorResendOtp",doctorController.resendOtp)
 DoctorRoute.post("/doctorLogin",doctorController.doctorLogin)
 
 
+
 module.exports = DoctorRoute
