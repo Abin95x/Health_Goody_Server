@@ -73,7 +73,7 @@ const blockUnblock = async (req, res) => {
             await user.save();
         }
         res.status(200).json({ user });
-        
+
 
     } catch (error) {
         console.log(error.message)
@@ -84,10 +84,11 @@ const blockUnblock = async (req, res) => {
 
 // doctor---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+//verified doctoers list
 
 const doctorList = async (req, res) => {
     try {
-        const doctors = await Doctor.find({ is_blocked: false })
+        const doctors = await Doctor.find({ admin_verify: true, otp_verified: true })
         res.status(200).json({ doctors })
 
 
@@ -97,6 +98,7 @@ const doctorList = async (req, res) => {
     }
 }
 
+//doctor details
 
 const doctorDetails = async (req, res) => {
     try {
@@ -112,27 +114,16 @@ const doctorDetails = async (req, res) => {
     }
 }
 
-const unVerified = async (req, res) => {
+
+
+
+// block doctor
+
+const blockApprove = async (req, res) => {
     try {
-        const doctors = await Doctor.find({ is_blocked: true, otp_verified: true });
-
-        res.status(200).json({ doctors })
-
-    } catch (error) {
-        console.log(error.message)
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-}
-
-
-const blockApprove = async(req,res) =>{
-    try{
         const { id } = req.body
-
         const doctor = await Doctor.findOne({ _id: id })
-
         const blocked = doctor.is_blocked
-
 
         if (blocked) {
             doctor.is_blocked = false;
@@ -143,14 +134,69 @@ const blockApprove = async(req,res) =>{
         }
         res.status(200).json({ doctor });
 
-
-
-    }catch(error){
+    } catch (error) {
         console.log(error.message)
         res.status(500).json({ message: 'Internal Server Error' });
 
     }
 }
+
+//unverified doctor list
+
+const unVerified = async (req, res) => {
+    try {
+        const doctors = await Doctor.find({ otp_verified: true, admin_verify: false });
+        res.status(200).json({ doctors })
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+//doctor details
+
+const unVerifiedDoctorDetails = async (req, res) => {
+    try {
+        const { id } = req.query; // Retrieve from query parameters
+
+        const details = await Doctor.findOne({ _id: id});
+
+        res.status(200).json({ details });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+//admin verify
+
+const adminVerify = async (req, res) => {
+    try {
+        console.log("first")
+        const { id } = req.query; 
+        console.log(id, 'iddaaaaaaaaaa');
+        const doctor = await Doctor.findById(id);
+        console.log(doctor,'drrrrrrrrrrrrrrrrrrrrrr')
+        const verified = doctor.admin_verify;
+
+        if (verified === false) {
+            doctor.admin_verify = true;
+            await doctor.save();
+
+            console.log(doctor,'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+            return res.status(200).json({ doctor });
+        } else {
+            console.log('zzzzzzzzzzzz')
+            return res.status(400).json({ error: 'Doctor is already verified' });
+        }
+    } catch (error) {
+        console.log("errrr")
+        console.log(error.message);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 
 
 
@@ -164,8 +210,10 @@ module.exports = {
     blockUnblock,
     doctorList,
     doctorDetails,
+    blockApprove,
     unVerified,
-    blockApprove
+    unVerifiedDoctorDetails,
+    adminVerify
 
 
 };

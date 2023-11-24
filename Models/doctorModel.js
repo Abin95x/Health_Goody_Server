@@ -13,22 +13,22 @@ const doctorSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    speciality:{
-        type:String,
-        required:true
+    speciality: {
+        type: String,
+        required: true
     },
     password: {
         type: String,
         required: true,
     },
-    photo:{
-        type:String,
+    photo: {
+        type: String,
         required: true
     },
-    cerificates:[
+    certificates: [  
         {
-            type:String,
-            required:true
+            type: String,
+            required: true
         }
     ],
     otp_verified: {
@@ -37,11 +37,15 @@ const doctorSchema = new mongoose.Schema({
     },
     is_blocked: {
         type: Boolean,
-        default: true
+        default: false
     },
-    languages:[
+    admin_verify:{
+        type: Boolean,
+        default:false
+    },
+    languages: [
         {
-            type:String
+            type: String
         }
     ],
     experiance: {
@@ -50,12 +54,10 @@ const doctorSchema = new mongoose.Schema({
     bio: {
         type: String,
     },
-    rating:{
+    rating: {
         type: Number
     }
-
-
 })
 
-const doctor = mongoose.model("Doctor",doctorSchema)
+const doctor = mongoose.model("Doctor", doctorSchema)
 module.exports = doctor

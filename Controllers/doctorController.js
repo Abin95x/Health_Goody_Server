@@ -14,19 +14,20 @@ let otpId
 const doctorRegistration = async (req, res) => {
     try {
         const { name, mobile, email, speciality, password1, photo, certificates } = req.body
+
         const spassword = await securePassword(password1)
         const emailExist = await Doctor.findOne({ email: email })
         if (emailExist) {
             res.status(409).json({ status: "Partner already registered with this email" });
         } else {
             const photoResult = await cloudinary.uploader.upload(photo, { folder: 'doctorPhotos' });
-            console.log(photoResult)
+
 
             // Upload multiple certificates to Cloudinary
             const certificateResults = await Promise.all(certificates.map(async (certificate) => {
                 return await cloudinary.uploader.upload(certificate, { folder: 'doctorsCertificates' });
             }));
-            console.log(certificateResults)
+
 
             const doctor = new Doctor({
                 name: name,
@@ -34,8 +35,8 @@ const doctorRegistration = async (req, res) => {
                 email: email,
                 speciality: speciality,
                 password: spassword,
-                photo: photoResult.secure_url, // Cloudinary URL for the uploaded photo
-                certificates: certificateResults.map(result => result.secure_url) // Array of Cloudinary URLs for certificates
+                photo: photoResult.secure_url,
+                certificates: certificateResults.map(result => result.secure_url)
             })
 
 
@@ -121,28 +122,33 @@ const doctorLogin = async (req, res) => {
         const { email, password } = req.body
         console.log("1")
         const emailExist = await Doctor.findOne({ email: email })
-        // console.log(emailExist,"oooooooooooooooooooooooooooooooooo")
         if (emailExist) {
             if (emailExist.otp_verified) {
-                if (emailExist.is_blocked === false) {
-                    const passCheck = await bcrypt.compare(password, emailExist.password)
-                    // console.log(passCheck,"oooooooooooooooooooooooooooooooooooooooooo")
-                    if (passCheck) {
-                        const doctortoken = jwt.sign({ doctorId: emailExist._id }, process.env.SECRET_KEY_DOCTOR, { expiresIn: "1h" })
-                        res.header('doctortoken', doctortoken);
-                        console.log(doctortoken)
-                        res.status(200).json({ doctorData: emailExist, doctortoken, message: `Welome ${emailExist.name}` });
-
+                if (emailExist.admin_verify) {
+                    if (emailExist.is_blocked === false) {
+                        const passCheck = await bcrypt.compare(password, emailExist.password)
+                        if (passCheck) {
+                            const doctortoken = jwt.sign({ doctorId: emailExist._id }, process.env.SECRET_KEY_DOCTOR, { expiresIn: "1h" })
+                            res.header('doctortoken', doctortoken);
+                            console.log(doctortoken)
+                            res.status(200).json({ doctorData: emailExist, doctortoken, message: `Welome ${emailExist.name}` });
+                        } else {
+                            res.status(401).json({
+                                message: "password is incorrect"
+                            });
+                        }
                     } else {
                         res.status(401).json({
-                            message: "password is incorrect"
+                            message: "you are blocked by admin"
                         });
                     }
+
                 } else {
-                    res.status(403).json    ({
+                    res.status(401).json({
                         message: "admin needs to verify you"
                     });
                 }
+
             } else {
                 otpId = await sendEmail(
                     emailExist.name,
@@ -173,6 +179,6 @@ module.exports = {
     otpVerify,
     resendOtp,
     doctorLogin,
-  
+
 
 }

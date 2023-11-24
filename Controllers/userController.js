@@ -120,7 +120,7 @@ const userLogin = async (req, res) => {
                         });
                     }
                 } else {
-                    res.status(403).json({
+                    res.status(401).json({
                         message: "User is blocked by admin"
                     });
                 }
@@ -133,7 +133,7 @@ const userLogin = async (req, res) => {
             }
 
         } else {
-            res.status(400).json({ message: "User not registered" });
+            res.status(401).json({ message: "User not registered" });
         }
 
     } catch (error) {
@@ -145,12 +145,7 @@ const userLogin = async (req, res) => {
 const setDetails = async (req, res) => {
     try {
         const { name, age, gender, mobile, _id } = req.body
-        console.log(req.body)
-        console.log(_id,'rtrtrt')
-        console.log(name,'hgghhh')
-
         const user = await User.findOneAndUpdate({ _id: _id }, { $set: { name: name, age: age, gender: gender, mobile: mobile } }, { new: true });
-        console.log(user, "user")
         res.status(200).json({ message: "User details updated successfully", user });
     } catch (error) {
         console.log(error);
