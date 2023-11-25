@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const authenticateDoctor = (req, res, next) => {
-    const token = req.headers.authorization  
+  const token = req.headers.authorization
   if (!token) {
     return res.status(401).json({ message: 'Access denied. No token provided.' });
   }
@@ -14,5 +14,5 @@ const authenticateDoctor = (req, res, next) => {
   }
 };
 
-module.exports = {authenticateDoctor};
+module.exports = { authenticateDoctor };
 

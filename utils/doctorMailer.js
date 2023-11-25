@@ -1,11 +1,11 @@
 const nodemailer = require("nodemailer")
 const dotenv = require("dotenv")
-const Otp = require ("../Models/doctorOtpModel.js")
+const Otp = require("../Models/doctorOtpModel.js")
 
 dotenv.config();
 
 
- const sendEmail = async (name,email,doctorId) => {
+const sendEmail = async (name, email, doctorId) => {
   try {
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -14,7 +14,7 @@ dotenv.config();
       requireTLS: true,
       auth: {
         user: process.env.EMAIL,
-        pass: process.env.PASSWORD  ,
+        pass: process.env.PASSWORD,
       },
     });
     let otp = `${Math.floor(1000 + Math.random() * 9000)}`;
@@ -48,10 +48,10 @@ dotenv.config();
     };
 
     const DoctorVerificationOtp = new Otp({
-      doctorId:doctorId,
-      otp:otp,
-      createdAt:Date.now(),
-      expiresAt:Date.now()+300000
+      doctorId: doctorId,
+      otp: otp,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 300000
     })
 
     let verified = await DoctorVerificationOtp.save()
@@ -60,7 +60,7 @@ dotenv.config();
       if (error) {
         console.log(error);
       } else {
-        console.log("otp -> ",otp);
+        console.log("otp -> ", otp);
         // console.log("email has been sent to:-", info.response);
         console.log("email has been send ")
       }

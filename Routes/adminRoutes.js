@@ -5,29 +5,35 @@ const auth = require("../Middlewares/adminAuth")
 
 //login
 
-AdminRoute.post("/adminLogin",adminController.adminLogin)
+AdminRoute.post("/adminLogin", adminController.adminLogin)
 
 //user
 
-AdminRoute.get("/userList",auth.authenticateAdmin,adminController.userList)
+AdminRoute.get("/userList", auth.authenticateAdmin, adminController.userList)
 
-AdminRoute.post("/userDetails",auth.authenticateAdmin,adminController.userDetails)
+AdminRoute.post("/userDetails", auth.authenticateAdmin, adminController.userDetails)
 
-AdminRoute.post("/blockUnblock",auth.authenticateAdmin,adminController.blockUnblock)
+AdminRoute.post("/blockUnblock", auth.authenticateAdmin, adminController.blockUnblock)
 
 // doctor
 
-AdminRoute.get("/doctorList",auth.authenticateAdmin,adminController.doctorList)
+AdminRoute.get("/doctorList", auth.authenticateAdmin, adminController.doctorList)
 
-AdminRoute.post("/doctorDetails",auth.authenticateAdmin,adminController.doctorDetails)
+AdminRoute.post("/doctorDetails", auth.authenticateAdmin, adminController.doctorDetails)
 
-AdminRoute.patch("/doctorblockUnblock",auth.authenticateAdmin,adminController.blockApprove)
+AdminRoute.patch("/doctorblockUnblock", auth.authenticateAdmin, adminController.blockApprove)
 
-AdminRoute.get("/unVerifiedList",auth.authenticateAdmin,adminController.unVerified)
+AdminRoute.get("/unVerifiedList", auth.authenticateAdmin, adminController.unVerified)
 
-AdminRoute.get("/unVerifiedDetails",auth.authenticateAdmin,adminController.unVerifiedDoctorDetails)
+AdminRoute.get("/unVerifiedDetails", auth.authenticateAdmin, adminController.unVerifiedDoctorDetails)
 
-AdminRoute.patch("/adminVerify",auth.authenticateAdmin,adminController.adminVerify)
+AdminRoute.patch("/adminVerify", auth.authenticateAdmin, adminController.adminVerify)
+
+//speciality
+
+AdminRoute.post("/addSpeciality",auth.authenticateAdmin,adminController.addSpeciality)
+
+AdminRoute.get("/specialityList",auth.authenticateAdmin,adminController.specialList)
 
 
 

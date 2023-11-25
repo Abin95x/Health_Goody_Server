@@ -25,7 +25,7 @@ const doctorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    certificates: [  
+    certificates: [
         {
             type: String,
             required: true
@@ -39,9 +39,9 @@ const doctorSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    admin_verify:{
+    admin_verify: {
         type: Boolean,
-        default:false
+        default: false
     },
     languages: [
         {
@@ -56,6 +56,11 @@ const doctorSchema = new mongoose.Schema({
     },
     rating: {
         type: Number
+    },
+    speciality: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Speciality',
+        required: true
     }
 })
 

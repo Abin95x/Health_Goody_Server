@@ -14,7 +14,6 @@ let otpId
 const doctorRegistration = async (req, res) => {
     try {
         const { name, mobile, email, speciality, password1, photo, certificates } = req.body
-
         const spassword = await securePassword(password1)
         const emailExist = await Doctor.findOne({ email: email })
         if (emailExist) {
@@ -22,12 +21,10 @@ const doctorRegistration = async (req, res) => {
         } else {
             const photoResult = await cloudinary.uploader.upload(photo, { folder: 'doctorPhotos' });
 
-
             // Upload multiple certificates to Cloudinary
             const certificateResults = await Promise.all(certificates.map(async (certificate) => {
                 return await cloudinary.uploader.upload(certificate, { folder: 'doctorsCertificates' });
             }));
-
 
             const doctor = new Doctor({
                 name: name,
@@ -39,7 +36,6 @@ const doctorRegistration = async (req, res) => {
                 certificates: certificateResults.map(result => result.secure_url)
             })
 
-
             const doctorData = await doctor.save()
             otpId = await sendEmail(
                 doctorData.name,
@@ -48,7 +44,6 @@ const doctorRegistration = async (req, res) => {
             )
             res.status(201).json({
                 status: `Otp has sent to ${email}`, doctorData: doctorData, otpId: otpId,
-
             });
 
         }
@@ -65,7 +60,6 @@ const otpVerify = async (req, res) => {
     try {
         const { otp, doctorId } = req.body
         const otpData = await Otp.find({ doctorId: doctorId })
-
         const { expiresAt } = otpData[otpData.length - 1];
         const correctOtp = otpData[otpData.length - 1].otp;
         if (otpData && expiresAt < Date.now()) {
@@ -92,12 +86,10 @@ const otpVerify = async (req, res) => {
 }
 
 
-
 //doctor resend otp
 const resendOtp = async (req, res) => {
     try {
         const { doctorId } = req.body
-
         const { id, name, email } = await Doctor.findById({ _id: doctorId })
         const otpId = sendEmail(name, email, id)
         if (otpId) {
@@ -116,11 +108,9 @@ const resendOtp = async (req, res) => {
 }
 
 
-
 const doctorLogin = async (req, res) => {
     try {
         const { email, password } = req.body
-        console.log("1")
         const emailExist = await Doctor.findOne({ email: email })
         if (emailExist) {
             if (emailExist.otp_verified) {
@@ -130,7 +120,6 @@ const doctorLogin = async (req, res) => {
                         if (passCheck) {
                             const doctortoken = jwt.sign({ doctorId: emailExist._id }, process.env.SECRET_KEY_DOCTOR, { expiresIn: "1h" })
                             res.header('doctortoken', doctortoken);
-                            console.log(doctortoken)
                             res.status(200).json({ doctorData: emailExist, doctortoken, message: `Welome ${emailExist.name}` });
                         } else {
                             res.status(401).json({

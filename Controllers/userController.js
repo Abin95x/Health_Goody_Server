@@ -16,7 +16,6 @@ let otpId
 const userRegistration = async (req, res) => {
     try {
         const { name, mobile, email, password1, photo } = req.body
-
         const spassword = await securePassword(password1)
         const emailExist = await User.findOne({ email: email })
         if (emailExist) {
@@ -49,7 +48,6 @@ const otpVerify = async (req, res) => {
     try {
         const { otp, userId } = req.body
         const otpData = await Otp.find({ userId: userId })
-
         const { expiresAt } = otpData[otpData.length - 1];
         const correctOtp = otpData[otpData.length - 1].otp;
         if (otpData && expiresAt < Date.now()) {
@@ -169,10 +167,7 @@ const doctorList = async (req, res) => {
 const getProfileData = async (req, res) => {
     try {
       const { id } = req.params;
-      console.log(id, "id");
-
       const user = await User.findOne({ _id: id });
-  
       res.status(200).json({ user });
     } catch (error) {
       console.log(error.message);
@@ -185,11 +180,7 @@ const getProfileData = async (req, res) => {
 const doctorDetails = async (req, res) => {
     try {
         const { id } = req.params
-        console.log(id, "params")
-
-
         const details = await Doctor.findOne({ _id: id })
-
         res.status(200).json({ details })
 
     } catch (error) {

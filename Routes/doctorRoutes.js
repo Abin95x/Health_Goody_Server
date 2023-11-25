@@ -3,13 +3,13 @@ const DoctorRoute = express()
 const doctorController = require("../Controllers/doctorController")
 const authDoc = require("../Middlewares/doctorAuth")
 
-DoctorRoute.post("/doctorSignup",doctorController.doctorRegistration)
+DoctorRoute.post("/doctorSignup", doctorController.doctorRegistration)
 
-DoctorRoute.post("/doctorOtpVerify",doctorController.otpVerify)
+DoctorRoute.post("/doctorOtpVerify", doctorController.otpVerify)
 
-DoctorRoute.post("/doctorResendOtp",doctorController.resendOtp)
+DoctorRoute.post("/doctorResendOtp", doctorController.resendOtp)
 
-DoctorRoute.post("/doctorLogin",doctorController.doctorLogin)
+DoctorRoute.post("/doctorLogin", doctorController.doctorLogin)
 
 
 

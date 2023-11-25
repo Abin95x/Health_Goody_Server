@@ -64,11 +64,11 @@ userRoute.post("/userSignup", userController.userRegistration);
 
 
 
-userRoute.post("/otpVerify",userController.otpVerify)
+userRoute.post("/otpVerify", userController.otpVerify)
 
 
 
-userRoute.post("/resendOtp",userController.resendOtp)
+userRoute.post("/resendOtp", userController.resendOtp)
 
 
 /**
@@ -120,16 +120,16 @@ userRoute.post("/resendOtp",userController.resendOtp)
  *       500:
  *         description: Internal Server Error.
  */
-userRoute.post("/userLogin",userController.userLogin)
+userRoute.post("/userLogin", userController.userLogin)
 
 
-userRoute.post("/setDetails",authUser.authenticateUser,userController.setDetails)
+userRoute.post("/setDetails", authUser.authenticateUser, userController.setDetails)
 
-userRoute.get('/profileData/:id',authUser.authenticateUser,userController.getProfileData)
+userRoute.get('/profileData/:id', authUser.authenticateUser, userController.getProfileData)
 
-userRoute.get("/doctorList",authUser.authenticateUser,userController.doctorList)
+userRoute.get("/doctorList", authUser.authenticateUser, userController.doctorList)
 
-userRoute.get("/doctorDetails/:id",authUser.authenticateUser,userController.doctorDetails)
+userRoute.get("/doctorDetails/:id", authUser.authenticateUser, userController.doctorDetails)
 
 
 
@@ -139,4 +139,4 @@ userRoute.get("/doctorDetails/:id",authUser.authenticateUser,userController.doct
 
 
 module.exports = userRoute
-    
+

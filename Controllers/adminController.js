@@ -3,12 +3,15 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const User = require("../Models/userModel")
 const Doctor = require("../Models/doctorModel")
+const Speciality = require("../Models/specialityModel")
+const cloudinary = require("../utils/cloudinary.js");
+const speciality = require("../Models/specialityModel");
+
 
 const adminLogin = async (req, res) => {
     try {
         const adminUsername = process.env.ADMIN_USERNAME;
         const adminPassword = process.env.ADMIN_PASSWORD;
-
         const { username, password } = req.body;
 
         if (username === adminUsername) {
@@ -50,8 +53,8 @@ const userDetails = async (req, res) => {
     try {
         const { id } = req.body
         const details = await User.findOne({ _id: id })
-
         res.status(200).json({ details })
+
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ message: "Internal Server Error" });
@@ -74,7 +77,6 @@ const blockUnblock = async (req, res) => {
         }
         res.status(200).json({ user });
 
-
     } catch (error) {
         console.log(error.message)
         res.status(500).json({ message: 'Internal Server Error' });
@@ -91,7 +93,6 @@ const doctorList = async (req, res) => {
         const doctors = await Doctor.find({ admin_verify: true, otp_verified: true })
         res.status(200).json({ doctors })
 
-
     } catch (error) {
         console.log(error.message)
         res.status(500).json({ message: 'Internal Server Error' });
@@ -103,9 +104,7 @@ const doctorList = async (req, res) => {
 const doctorDetails = async (req, res) => {
     try {
         const { id } = req.body
-
         const details = await Doctor.findOne({ _id: id })
-
         res.status(200).json({ details })
 
     } catch (error) {
@@ -159,9 +158,7 @@ const unVerified = async (req, res) => {
 const unVerifiedDoctorDetails = async (req, res) => {
     try {
         const { id } = req.query; // Retrieve from query parameters
-
         const details = await Doctor.findOne({ _id: id});
-
         res.status(200).json({ details });
     } catch (error) {
         console.log(error.message);
@@ -173,29 +170,66 @@ const unVerifiedDoctorDetails = async (req, res) => {
 
 const adminVerify = async (req, res) => {
     try {
-        console.log("first")
         const { id } = req.query; 
-        console.log(id, 'iddaaaaaaaaaa');
         const doctor = await Doctor.findById(id);
-        console.log(doctor,'drrrrrrrrrrrrrrrrrrrrrr')
         const verified = doctor.admin_verify;
 
         if (verified === false) {
             doctor.admin_verify = true;
             await doctor.save();
-
-            console.log(doctor,'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
             return res.status(200).json({ doctor });
         } else {
-            console.log('zzzzzzzzzzzz')
-            return res.status(400).json({ error: 'Doctor is already verified' });
+            return res.status(400).json({ message: 'Doctor is already verified' });
         }
     } catch (error) {
-        console.log("errrr")
         console.log(error.message);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+const addSpeciality = async (req, res) => {
+    try {
+        const specialityName = req.body.value.speciality;
+        const photo = req.body.value.photo;
+
+        const existing = await Speciality.findOne({
+            speciality: { $regex: new RegExp('^' + specialityName + '$', 'i') },
+        });
+
+        console.log(existing, "uuuuuuuuu");
+
+        if (existing) {
+            return res.status(400).json({ message: 'Speciality already exists' });
+        }
+
+        const photoResult = await cloudinary.uploader.upload(photo, { folder: 'specialitysvg' });
+
+        const newSpeciality = new Speciality({
+            speciality: specialityName,
+            photo: photoResult.secure_url, // Save the URL or any identifier you need
+        });
+
+        await newSpeciality.save();
+
+        res.status(200).json({ success: true, message: 'Speciality added successfully' });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+const specialList = async(req,res) =>{
+    try{
+        const data = Speciality.find()
+        console.log(data)
+        res.status(200).json({data})
+
+    }catch(error){
+        console.log(error.message)
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
 
 
 
@@ -213,7 +247,9 @@ module.exports = {
     blockApprove,
     unVerified,
     unVerifiedDoctorDetails,
-    adminVerify
+    adminVerify,
+    addSpeciality,
+    specialList
 
 
 };

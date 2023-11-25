@@ -1,10 +1,10 @@
 const bcrypt = require("bcryptjs")
 
-const securePassword = async(password) => {
+const securePassword = async (password) => {
     try {
-        const passwordHashed = await bcrypt.hash(password,10)
+        const passwordHashed = await bcrypt.hash(password, 10)
         return passwordHashed
-    }catch(error){
+    } catch (error) {
         console.log(error.message)
     }
 }
