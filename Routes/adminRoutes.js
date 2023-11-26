@@ -35,6 +35,9 @@ AdminRoute.post("/addSpeciality",auth.authenticateAdmin,adminController.addSpeci
 
 AdminRoute.get("/specialityList",auth.authenticateAdmin,adminController.specialList)
 
+AdminRoute.patch("/listUnlist",auth.authenticateAdmin,adminController.listUnlist)
+
+AdminRoute.patch("/editSpeciality",auth.authenticateAdmin,adminController.editSpeciality)
 
 
 

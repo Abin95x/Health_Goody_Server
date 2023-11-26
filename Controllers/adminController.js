@@ -187,20 +187,32 @@ const adminVerify = async (req, res) => {
     }
 };
 
+//speciality----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 const addSpeciality = async (req, res) => {
     try {
         const specialityName = req.body.value.speciality;
         const photo = req.body.value.photo;
 
+        // Validate inputs
+        if (!specialityName || !photo) {
+            return res.status(400).json({ message: 'Missing required parameters' });
+        }
+
+        // Additional validation for specialityName: No spaces allowed
+        if (specialityName.includes(' ')) {
+            return res.status(400).json({ message: 'Speciality name cannot contain spaces' });
+        }
+
         const existing = await Speciality.findOne({
             speciality: { $regex: new RegExp('^' + specialityName + '$', 'i') },
         });
 
-        console.log(existing, "uuuuuuuuu");
-
         if (existing) {
             return res.status(400).json({ message: 'Speciality already exists' });
         }
+
+        // Add validation for photo URL, if needed
 
         const photoResult = await cloudinary.uploader.upload(photo, { folder: 'specialitysvg' });
 
@@ -213,15 +225,16 @@ const addSpeciality = async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Speciality added successfully' });
     } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
 
+
 const specialList = async(req,res) =>{
     try{
-        const data = Speciality.find()
-        console.log(data)
+        const data = await Speciality.find()
+      
         res.status(200).json({data})
 
     }catch(error){
@@ -229,6 +242,70 @@ const specialList = async(req,res) =>{
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+const listUnlist = async(req,res) =>{
+    try{
+        const {id}  = req.query
+        const data = await speciality.findById(id)
+        console.log(data,'ddddddddddddddata')
+
+        if(data.list){
+            data.list = false
+        }else{
+            data.list = true
+        }
+
+        await data.save()
+        res.status(200).json({message:"Successfull"})
+
+    }catch(error){
+        console.log(error.message)
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+const editSpeciality = async (req, res) => {
+    try {
+        const id = req.body.values.id;
+        const editedName = req.body.values.edit;
+        const photo = req.body.values.photo;
+
+        // Validate inputs
+        if (!id || !editedName) {
+            return res.status(400).json({ message: 'Missing required parameters' });
+        }
+
+        // Add additional validation for editedName, if needed
+
+        const existing = await Speciality.findOne({
+            speciality: { $regex: new RegExp('^' + editedName + '$', 'i') },
+        });
+
+        if (existing) {
+            return res.status(400).json({ message: 'Speciality already exists' });
+        }
+
+        let photoUrl;
+
+        // Check if a photo is provided
+        if (photo) {
+            // Add validation for photo URL, if needed
+            const photoResult = await cloudinary.uploader.upload(photo, { folder: 'specialitysvg' });
+            photoUrl = photoResult.secure_url;
+        }
+
+        const data = await Speciality.findOneAndUpdate(
+            { _id: id },
+            { speciality: editedName, ...(photoUrl && { photo: photoUrl }) },
+            { new: true }
+        );
+
+        res.status(200).json({ success: true, message: 'Speciality updated successfully', data });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 
 
@@ -249,7 +326,9 @@ module.exports = {
     unVerifiedDoctorDetails,
     adminVerify,
     addSpeciality,
-    specialList
+    specialList,
+    listUnlist,
+    editSpeciality,
 
 
 };
