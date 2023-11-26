@@ -7,6 +7,7 @@ const User = require("../Models/userModel")
 const Doctor = require("../Models/doctorModel.js")
 const Otp = require("../Models/userOtpModel.js")
 const cloudinary = require("../utils/cloudinary.js")
+const Speciality = require("../Models/specialityModel.js")
 
 
 let otpId
@@ -189,6 +190,17 @@ const doctorDetails = async (req, res) => {
     }
 }
 
+const specialityList = async(req,res)=>{
+    try{
+        const data = await Speciality.find()
+        res.status(200).json({message: "successfull",data})
+        console.log(data)
+    }catch(error){
+        console.log(error.message)
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
 
 
 module.exports = {
@@ -199,6 +211,7 @@ module.exports = {
     setDetails,
     doctorList,
     doctorDetails,
-    getProfileData
+    getProfileData,
+    specialityList,
 }
 
