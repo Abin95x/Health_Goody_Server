@@ -11,6 +11,7 @@ DoctorRoute.post("/doctorResendOtp", doctorController.resendOtp)
 
 DoctorRoute.post("/doctorLogin", doctorController.doctorLogin)
 
+DoctorRoute.get("/specialityName",doctorController.specialityName)
 
 
 module.exports = DoctorRoute

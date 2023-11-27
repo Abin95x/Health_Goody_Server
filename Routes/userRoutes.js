@@ -131,7 +131,7 @@ userRoute.get("/doctorList", authUser.authenticateUser, userController.doctorLis
 
 userRoute.get("/doctorDetails/:id", authUser.authenticateUser, userController.doctorDetails)
 
-userRoute.get("/specialityList", authUser.authenticateUser,userController.specialityList)
+userRoute.get("/specialityList",userController.specialityList)
 
 
 

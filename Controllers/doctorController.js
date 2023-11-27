@@ -6,6 +6,7 @@ const securePassword = require("../utils/securePassword.js")
 const Otp = require("../Models/doctorOtpModel.js")
 const Doctor = require("../Models/doctorModel.js")
 const cloudinary = require("../utils/cloudinary.js")
+const Speciality = require("../Models/specialityModel.js")
 
 
 let otpId
@@ -13,7 +14,10 @@ let otpId
 
 const doctorRegistration = async (req, res) => {
     try {
+        console.log(req.body,"bodyyyyyyyyyy")
+
         const { name, mobile, email, speciality, password1, photo, certificates } = req.body
+        
         const spassword = await securePassword(password1)
         const emailExist = await Doctor.findOne({ email: email })
         if (emailExist) {
@@ -161,6 +165,18 @@ const doctorLogin = async (req, res) => {
     }
 }
 
+const specialityName = async(req,res)=>{
+    try{
+        const data = await Speciality.find()
+        res.status(200).json({data})
+
+    }catch(error){
+        console.log(error.message)
+        return res.status(500).json({ status: "Internal Server Error" });
+
+    }
+}
+
 
 
 module.exports = {
@@ -168,6 +184,7 @@ module.exports = {
     otpVerify,
     resendOtp,
     doctorLogin,
+    specialityName,
 
 
 }

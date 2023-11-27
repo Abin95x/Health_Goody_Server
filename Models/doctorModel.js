@@ -13,9 +13,14 @@ const doctorSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    // speciality: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref:'Speciality',
+    //     required: true
+    // },
     speciality: {
         type: String,
-        required: true
+        require:true
     },
     password: {
         type: String,
@@ -57,11 +62,7 @@ const doctorSchema = new mongoose.Schema({
     rating: {
         type: Number
     },
-    speciality: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Speciality',
-        required: true
-    }
+
 })
 
 const doctor = mongoose.model("Doctor", doctorSchema)
