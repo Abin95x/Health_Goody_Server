@@ -177,6 +177,15 @@ const specialityName = async(req,res)=>{
     }
 }
 
+const slotDetails = async (req,res) =>{
+    try{
+        console.log(req.body)
+        
+    }catch(error){
+        console.log(error.message)
+    }
+}
+
 
 
 module.exports = {
@@ -185,6 +194,7 @@ module.exports = {
     resendOtp,
     doctorLogin,
     specialityName,
+    slotDetails
 
 
 }

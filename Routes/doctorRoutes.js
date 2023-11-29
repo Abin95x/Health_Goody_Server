@@ -13,5 +13,7 @@ DoctorRoute.post("/doctorLogin", doctorController.doctorLogin)
 
 DoctorRoute.get("/specialityName",doctorController.specialityName)
 
+DoctorRoute.post("/slotDetails",authDoc.authenticateDoctor,doctorController.slotDetails)
+
 
 module.exports = DoctorRoute
