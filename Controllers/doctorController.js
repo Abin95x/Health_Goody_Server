@@ -14,10 +14,10 @@ let otpId
 
 const doctorRegistration = async (req, res) => {
     try {
-        console.log(req.body,"bodyyyyyyyyyy")
+        console.log(req.body, "bodyyyyyyyyyy")
 
         const { name, mobile, email, speciality, password1, photo, certificates } = req.body
-        
+
         const spassword = await securePassword(password1)
         const emailExist = await Doctor.findOne({ email: email })
         if (emailExist) {
@@ -165,9 +165,134 @@ const doctorLogin = async (req, res) => {
     }
 }
 
-const specialityName = async(req,res)=>{
-    try{
+const specialityName = async (req, res) => {
+    try {
         const data = await Speciality.find()
+        res.status(200).json({ data })
+
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({ status: "Internal Server Error" });
+
+    }
+}
+
+
+
+// Function to generate time slots
+const generateTimeSlots = (startTime, endTime, slotDuration) => {
+    const timeSlots = [];
+
+    // Convert start and end time to Date objects for easy manipulation
+    const start = new Date(`1970-01-01T${startTime}`);
+    const end = new Date(`1970-01-01T${endTime}`);
+
+    // Initialize current time to the start time
+    let currentTime = start;
+
+    // Loop until current time exceeds the end time
+    while (currentTime <= end) {
+        // Format the current time to HH:mm format
+        const formattedTime = currentTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+        // Add the formatted time to the timeSlots array
+        timeSlots.push(formattedTime);
+
+        // Move to the next time slot by adding the slot duration to the current time
+        currentTime = new Date(currentTime.getTime() + slotDuration * 60000); // Convert slot duration to milliseconds
+    }
+
+    return timeSlots;
+};
+
+
+
+const slotCreation = async (req, res) => {
+    try {
+     
+        const { startTime, endTime, slotDuration, date } = req.body.formData
+        const id = req.body.id
+
+        const originalDate = new Date(date);
+        // const formattedDate = originalDate.toLocaleDateString('en-US', {
+        //     year: 'numeric',
+        //     month: 'numeric',
+        //     day: 'numeric'
+        // });
+        // console.log(formattedDate);
+
+        const isExist = await Doctor.findOne({
+            _id: id,
+            slots: {
+                $elemMatch: {
+                    $and: [
+                        { date: date },
+                        { startTime: startTime },
+                        { endTime: endTime }
+                    ]
+                }
+            }
+        })
+
+        if (isExist) {
+            return res.status(200).send({
+                success: false,
+                message: "This time already exists",
+            });
+        }
+
+        // const already = await Doctor.findOne({
+        //     _id: id,
+        //     slots: {
+        //         $elemMatch: {
+        //             $and: [{ date: date }],
+        //         },
+        //     },
+        // });
+
+        // if (already) {
+        //     return res.status(200).send({
+        //         success: false,
+        //         message: "This day time already Scheduled",
+        //     });
+        // }
+
+        const timeSlots = generateTimeSlots(startTime, endTime, slotDuration);
+        const doctor = await Doctor.updateOne(
+            { _id: id },
+            {
+              $push: {
+                slots: {
+                  date,
+                  startTime,
+                  endTime,
+                  slotDuration,
+                  timeSlots,
+                },
+              },
+            }
+          );
+      
+    
+          res.status(200).send({
+            success: true,
+            message: "slot created successfully",
+          });
+
+
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({ status: "Internal Server Error" });
+
+    }
+}
+
+const slotList = async(req,res)=>{
+    try{
+        const id = req.query.id
+        const doctor = await Doctor.findById(id)
+        const data = doctor.slots
+    
         res.status(200).json({data})
 
     }catch(error){
@@ -177,16 +302,6 @@ const specialityName = async(req,res)=>{
     }
 }
 
-const slotDetails = async (req,res) =>{
-    try{
-        console.log(req.body)
-        
-    }catch(error){
-        console.log(error.message)
-    }
-}
-
-
 
 module.exports = {
     doctorRegistration,
@@ -194,7 +309,8 @@ module.exports = {
     resendOtp,
     doctorLogin,
     specialityName,
-    slotDetails
-
+    slotCreation,
+    slotList,
 
 }
+

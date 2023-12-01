@@ -6,8 +6,8 @@ const authenticateDoctor = (req, res, next) => {
     return res.status(401).json({ message: 'Access denied. No token provided.' });
   }
   try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY_USER);
-    req.userId = decoded.userId; // Add the adminId to the request object for later use
+    const decoded = jwt.verify(token, process.env.SECRET_KEY_DOCTOR);
+    req.doctorId = decoded.doctorId; // Add the adminId to the request object for later use
     next();
   } catch (err) {
     res.status(401).json({ message: 'Invalid token.' });

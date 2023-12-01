@@ -20,7 +20,7 @@ const doctorSchema = new mongoose.Schema({
     // },
     speciality: {
         type: String,
-        require:true
+        require: true
     },
     password: {
         type: String,
@@ -62,6 +62,30 @@ const doctorSchema = new mongoose.Schema({
     rating: {
         type: Number
     },
+    // availability: [daySchema],
+    slots: [
+        {
+            date: {
+                type: String,
+            },
+            startTime: {
+                type: String,
+            },
+            endTime: {
+                type: String,
+            },
+            status: {
+                type: String,
+                default: "active",
+            },
+            slotDuration: {
+                type: String,
+            },
+            timeSlots: {
+                type: Array
+            }
+        },
+    ],
 
 })
 
