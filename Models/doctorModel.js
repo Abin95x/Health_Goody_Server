@@ -13,11 +13,7 @@ const doctorSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    // speciality: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref:'Speciality',
-    //     required: true
-    // },
+    
     speciality: {
         type: String,
         require: true

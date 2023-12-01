@@ -133,6 +133,10 @@ userRoute.get("/doctorDetails/:id", authUser.authenticateUser, userController.do
 
 userRoute.get("/specialityList",userController.specialityList)
 
+userRoute.get("/slotList",authUser.authenticateUser,userController.slotList)
+
+
+
 
 
 

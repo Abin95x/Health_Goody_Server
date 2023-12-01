@@ -202,6 +202,38 @@ const specialityList = async(req,res)=>{
 }
 
 
+const slotList = async (req, res) => {
+    try {
+        const { id, date } = req.query;
+
+        // Assuming DoctorModel is your mongoose model for doctors
+        const doctor = await Doctor.findById(id);
+
+        if (!doctor) {
+            return res.status(404).json({ error: 'Doctor not found' });
+        }
+
+        const dateToMatch = new Date(date).toDateString();
+
+        const slotsForDate = doctor.slots
+          .filter(slot => new Date(slot.date).toDateString() === dateToMatch)
+          .map(slot => ({
+            date: slot.date,
+            timeSlots: slot.timeSlots.filter(timeSlot => new Date(timeSlot.date).toDateString() === dateToMatch)
+          }))
+          .filter(slot => slot.timeSlots.length > 0);
+        
+
+        res.status(200).json({ slots: slotsForDate });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+
+
 
 module.exports = {
     userRegistration,
@@ -213,5 +245,6 @@ module.exports = {
     doctorDetails,
     getProfileData,
     specialityList,
+    slotList,
 }
 

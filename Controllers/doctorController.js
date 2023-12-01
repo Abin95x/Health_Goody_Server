@@ -7,6 +7,8 @@ const Otp = require("../Models/doctorOtpModel.js")
 const Doctor = require("../Models/doctorModel.js")
 const cloudinary = require("../utils/cloudinary.js")
 const Speciality = require("../Models/specialityModel.js")
+const { ObjectId } = require("mongodb");
+const moment = require('moment');
 
 
 let otpId
@@ -180,31 +182,42 @@ const specialityName = async (req, res) => {
 
 
 // Function to generate time slots
-const generateTimeSlots = (startTime, endTime, slotDuration) => {
+const generateTimeSlots = (start, end, duration) => {
     const timeSlots = [];
-
-    // Convert start and end time to Date objects for easy manipulation
-    const start = new Date(`1970-01-01T${startTime}`);
-    const end = new Date(`1970-01-01T${endTime}`);
-
-    // Initialize current time to the start time
-    let currentTime = start;
-
-    // Loop until current time exceeds the end time
-    while (currentTime <= end) {
-        // Format the current time to HH:mm format
-        const formattedTime = currentTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-
-        // Add the formatted time to the timeSlots array
-        timeSlots.push(formattedTime);
-
-        // Move to the next time slot by adding the slot duration to the current time
-        currentTime = new Date(currentTime.getTime() + slotDuration * 60000); // Convert slot duration to milliseconds
+    const slotDuration = parseInt(duration);
+  
+    const [hours, minutes] = start.split(":");
+    let currentTime = new Date();
+    currentTime.setHours(hours);
+    currentTime.setMinutes(minutes);
+  
+    const [hrs, min] = end.split(":");
+    const ends = new Date();
+    ends.setHours(hrs);
+    ends.setMinutes(min);
+  
+    while (currentTime < ends) {
+      const endTime = new Date(currentTime);
+      endTime.setMinutes(endTime.getMinutes() + slotDuration);
+  
+      if (endTime <= ends) {
+        const objectId = new ObjectId();
+        const endingTime = moment(endTime);
+        const staring = new Date(currentTime);
+        const startingTime = moment(staring);
+        timeSlots.push({
+          start: startingTime.format("HH:mm"),
+          end: endingTime.format("HH:mm"),
+          booked: false,
+          objectId: objectId.toString(),
+        });
+      }
+  
+      currentTime = endTime;
     }
-
+  
     return timeSlots;
-};
-
+  };
 
 
 const slotCreation = async (req, res) => {
@@ -214,12 +227,6 @@ const slotCreation = async (req, res) => {
         const id = req.body.id
 
         const originalDate = new Date(date);
-        // const formattedDate = originalDate.toLocaleDateString('en-US', {
-        //     year: 'numeric',
-        //     month: 'numeric',
-        //     day: 'numeric'
-        // });
-        // console.log(formattedDate);
 
         const isExist = await Doctor.findOne({
             _id: id,
@@ -258,6 +265,7 @@ const slotCreation = async (req, res) => {
         // }
 
         const timeSlots = generateTimeSlots(startTime, endTime, slotDuration);
+        console.log(timeSlots,"ttttttimmmmmmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         const doctor = await Doctor.updateOne(
             { _id: id },
             {
