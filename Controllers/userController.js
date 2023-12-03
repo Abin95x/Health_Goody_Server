@@ -5,9 +5,13 @@ const sendEmail = require("../utils/nodeMailer.js")
 const securePassword = require("../utils/securePassword.js")
 const User = require("../Models/userModel")
 const Doctor = require("../Models/doctorModel.js")
+const Payment = require("../Models/paymentModel.js")
+const Appointment = require("../Models/appointmentModel.js")
 const Otp = require("../Models/userOtpModel.js")
 const cloudinary = require("../utils/cloudinary.js")
 const Speciality = require("../Models/specialityModel.js")
+const moment = require('moment');
+
 
 
 let otpId
@@ -167,15 +171,15 @@ const doctorList = async (req, res) => {
 
 const getProfileData = async (req, res) => {
     try {
-      const { id } = req.params;
-      const user = await User.findOne({ _id: id });
-      res.status(200).json({ user });
+        const { id } = req.params;
+        const user = await User.findOne({ _id: id });
+        res.status(200).json({ user });
     } catch (error) {
-      console.log(error.message);
-      res.status(500).json({ message: "Internal Server Error" });
+        console.log(error.message);
+        res.status(500).json({ message: "Internal Server Error" });
     }
-  };
-  
+};
+
 
 
 const doctorDetails = async (req, res) => {
@@ -190,46 +194,137 @@ const doctorDetails = async (req, res) => {
     }
 }
 
-const specialityList = async(req,res)=>{
-    try{
+const specialityList = async (req, res) => {
+    try {
         const data = await Speciality.find()
-        res.status(200).json({message: "successfull",data})
-        console.log(data)
-    }catch(error){
+        res.status(200).json({ message: "successfull", data })
+        // console.log(data)
+    } catch (error) {
         console.log(error.message)
         res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
 
+
 const slotList = async (req, res) => {
     try {
         const { id, date } = req.query;
 
-        // Assuming DoctorModel is your mongoose model for doctors
+        const selectedDate = moment.utc(date); // Set timezone to UTC
+
         const doctor = await Doctor.findById(id);
 
-        if (!doctor) {
-            return res.status(404).json({ error: 'Doctor not found' });
-        }
+        // Filter slots based on the selected date
+        const availableSlots = doctor.slots.filter((slot) => {
+            const slotDate = moment.utc(slot.date); // Set timezone to UTC
+            return slotDate.isSame(selectedDate, 'day');
+        });
 
-        const dateToMatch = new Date(date).toDateString();
 
-        const slotsForDate = doctor.slots
-          .filter(slot => new Date(slot.date).toDateString() === dateToMatch)
-          .map(slot => ({
-            date: slot.date,
-            timeSlots: slot.timeSlots.filter(timeSlot => new Date(timeSlot.date).toDateString() === dateToMatch)
-          }))
-          .filter(slot => slot.timeSlots.length > 0);
-        
+        res.status(200).json({ availableSlots });
+    } catch (error) {
+        // console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
 
-        res.status(200).json({ slots: slotsForDate });
+
+const stripe = require('stripe')('sk_test_51OIn6JSGxvp5pPKvKDRLk0eSdUKaFzQwiFZDUio38fbV98ejXN7w9rgokn1YyxAIWTxMXm6ev5NDqJluUQtp86kB00Fq1zjAPt');
+
+const makePayment = async (req, res) => {
+    try {
+        const { price, date, _id, drId, select } = req.body;
+
+        // Assuming date is already in ISO format, no need to convert it
+        const selectedDate = moment(date);
+
+        // console.log(date, 'original date');
+        // console.log(selectedDate.format(), 'formatted date');
+
+        const session = await stripe.checkout.sessions.create({
+            billing_address_collection: 'auto',
+            line_items: [
+                {
+                    price: price.id,
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `http://localhost:3000/success?_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
+            cancel_url: `http://localhost:3000/cancel`,
+        });
+
+        res.status(200).json({ session });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'An error occurred while processing the payment.' });
+    }
+};
+
+
+const makeAppointment = async (req, res) => {
+    try {
+        // Destructuring request body
+        const { drId, _id, date, select } = req.body;
+        const price = "299";
+
+        // Creating a Payment
+        const payment = new Payment({
+            doctor: drId,
+            user: _id,
+            price: price,
+        });
+
+        const paymentData = await payment.save();
+
+        // Update the booked status of the selected time slot
+        const updatedDoctor = await Doctor.findOneAndUpdate(
+            { _id: drId, 'slots.timeSlots.objectId': select },
+            { $set: { 'slots.$[outer].timeSlots.$[inner].booked': true } },
+            {
+                arrayFilters: [
+                    { 'outer._id': { $exists: true } },
+                    { 'inner.objectId': select },
+                ],
+                new: true, // Return the modified document
+            }
+        );
+
+        // Finding Selected Slot
+        const selectedSlot = updatedDoctor.slots.reduce((found, ts) => {
+            const slot = ts.timeSlots.find((item) => item.objectId === select);
+            if (slot) {
+                found = slot;
+            }
+            return found;
+        }, null);
+
+        // Creating an Appointment
+        const appointment = new Appointment({
+            doctor: drId,
+            user: _id,
+            paymentId: paymentData._id,
+            slotId: select,
+            consultationDate: date,
+            start: selectedSlot.start,
+            end: selectedSlot.end,
+        });
+
+        const appointmentData = await appointment.save();
+
+        // Sending Response
+        res.status(200).json({ paymentData, appointmentData });
+
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+
+
+
 
 
 
@@ -246,5 +341,7 @@ module.exports = {
     getProfileData,
     specialityList,
     slotList,
+    makePayment,
+    makeAppointment
 }
 

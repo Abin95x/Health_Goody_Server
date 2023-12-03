@@ -135,6 +135,10 @@ userRoute.get("/specialityList",userController.specialityList)
 
 userRoute.get("/slotList",authUser.authenticateUser,userController.slotList)
 
+userRoute.post("/makePayment",authUser.authenticateUser,userController.makePayment)
+
+userRoute.post("/makeAppointment",authUser.authenticateUser,userController.makeAppointment)
+
 
 
 

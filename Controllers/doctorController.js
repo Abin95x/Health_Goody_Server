@@ -16,8 +16,7 @@ let otpId
 
 const doctorRegistration = async (req, res) => {
     try {
-        console.log(req.body, "bodyyyyyyyyyy")
-
+        
         const { name, mobile, email, speciality, password1, photo, certificates } = req.body
 
         const spassword = await securePassword(password1)
@@ -265,7 +264,7 @@ const slotCreation = async (req, res) => {
         // }
 
         const timeSlots = generateTimeSlots(startTime, endTime, slotDuration);
-        console.log(timeSlots,"ttttttimmmmmmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        // console.log(timeSlots,"ttttttimmmmmmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         const doctor = await Doctor.updateOne(
             { _id: id },
             {
@@ -311,6 +310,7 @@ const slotList = async(req,res)=>{
 }
 
 
+
 module.exports = {
     doctorRegistration,
     otpVerify,
@@ -319,6 +319,7 @@ module.exports = {
     specialityName,
     slotCreation,
     slotList,
+
 
 }
 
