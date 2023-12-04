@@ -31,13 +31,15 @@ AdminRoute.patch("/adminVerify", auth.authenticateAdmin, adminController.adminVe
 
 //speciality
 
-AdminRoute.post("/addSpeciality",auth.authenticateAdmin,adminController.addSpeciality)
+AdminRoute.post("/addSpeciality", auth.authenticateAdmin, adminController.addSpeciality)
 
-AdminRoute.get("/specialityList",auth.authenticateAdmin,adminController.specialList)
+AdminRoute.get("/specialityList", auth.authenticateAdmin, adminController.specialList)
 
-AdminRoute.patch("/listUnlist",auth.authenticateAdmin,adminController.listUnlist)
+AdminRoute.patch("/listUnlist", auth.authenticateAdmin, adminController.listUnlist)
 
-AdminRoute.patch("/editSpeciality",auth.authenticateAdmin,adminController.editSpeciality)
+AdminRoute.patch("/editSpeciality", auth.authenticateAdmin, adminController.editSpeciality)
+
+AdminRoute.get("/counts", auth.authenticateAdmin, adminController.counts)
 
 
 

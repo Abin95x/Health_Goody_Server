@@ -44,12 +44,12 @@ const doctorSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    languages: [
-        {
-            type: String
-        }
-    ],
-    experiance: {
+    // languages: [
+    //     {
+    //         type: String
+    //     }
+    // ],
+    experience: {
         type: String,
     },
     bio: {

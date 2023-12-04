@@ -16,7 +16,7 @@ let otpId
 
 const doctorRegistration = async (req, res) => {
     try {
-        
+
         const { name, mobile, email, speciality, password1, photo, certificates } = req.body
 
         const spassword = await securePassword(password1)
@@ -184,61 +184,63 @@ const specialityName = async (req, res) => {
 const generateTimeSlots = (start, end, duration) => {
     const timeSlots = [];
     const slotDuration = parseInt(duration);
-  
+
     const [hours, minutes] = start.split(":");
     let currentTime = new Date();
     currentTime.setHours(hours);
     currentTime.setMinutes(minutes);
-  
+
     const [hrs, min] = end.split(":");
     const ends = new Date();
     ends.setHours(hrs);
     ends.setMinutes(min);
-  
+
     while (currentTime < ends) {
-      const endTime = new Date(currentTime);
-      endTime.setMinutes(endTime.getMinutes() + slotDuration);
-  
-      if (endTime <= ends) {
-        const objectId = new ObjectId();
-        const endingTime = moment(endTime);
-        const staring = new Date(currentTime);
-        const startingTime = moment(staring);
-        timeSlots.push({
-          start: startingTime.format("HH:mm"),
-          end: endingTime.format("HH:mm"),
-          booked: false,
-          objectId: objectId.toString(),
-        });
-      }
-  
-      currentTime = endTime;
+        const endTime = new Date(currentTime);
+        endTime.setMinutes(endTime.getMinutes() + slotDuration);
+
+        if (endTime <= ends) {
+            const objectId = new ObjectId();
+            const endingTime = moment(endTime);
+            const staring = new Date(currentTime);
+            const startingTime = moment(staring);
+            timeSlots.push({
+                start: startingTime.format("HH:mm"),
+                end: endingTime.format("HH:mm"),
+                booked: false,
+                objectId: objectId.toString(),
+            });
+        }
+
+        currentTime = endTime;
     }
-  
+
     return timeSlots;
-  };
+};
 
 
 const slotCreation = async (req, res) => {
     try {
-     
-        const { startTime, endTime, slotDuration, date } = req.body.formData
-        const id = req.body.id
+        const { startTime, endTime, slotDuration, date } = req.body.formData;
+        const id = req.body.id;
 
-        const originalDate = new Date(date);
+        // Ensure date is a valid JavaScript Date object
+        const parsedDate = new Date(date);
+
+        // No need to create originalDate if you want to use the date as it is
 
         const isExist = await Doctor.findOne({
             _id: id,
             slots: {
                 $elemMatch: {
                     $and: [
-                        { date: date },
+                        { date: parsedDate },
                         { startTime: startTime },
                         { endTime: endTime }
                     ]
                 }
             }
-        })
+        });
 
         if (isExist) {
             return res.status(200).send({
@@ -247,45 +249,45 @@ const slotCreation = async (req, res) => {
             });
         }
 
-        // const already = await Doctor.findOne({
-        //     _id: id,
-        //     slots: {
-        //         $elemMatch: {
-        //             $and: [{ date: date }],
-        //         },
-        //     },
-        // });
-
-        // if (already) {
-        //     return res.status(200).send({
-        //         success: false,
-        //         message: "This day time already Scheduled",
-        //     });
-        // }
+        // Rest of the code remains unchanged
 
         const timeSlots = generateTimeSlots(startTime, endTime, slotDuration);
-        // console.log(timeSlots,"ttttttimmmmmmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+
         const doctor = await Doctor.updateOne(
             { _id: id },
             {
-              $push: {
-                slots: {
-                  date,
-                  startTime,
-                  endTime,
-                  slotDuration,
-                  timeSlots,
+                $push: {
+                    slots: {
+                        date: parsedDate, // Use the parsed date here
+                        startTime,
+                        endTime,
+                        slotDuration,
+                        timeSlots,
+                    },
                 },
-              },
             }
-          );
-      
-    
-          res.status(200).send({
-            success: true,
-            message: "slot created successfully",
-          });
+        );
 
+        res.status(200).send({
+            success: true,
+            message: "Slot created successfully",
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "Internal Server Error" });
+    }
+};
+
+
+
+const slotList = async (req, res) => {
+    try {
+        const id = req.query.id
+        const doctor = await Doctor.findById(id)
+        const data = doctor.slots
+
+        res.status(200).json({ data })
 
     } catch (error) {
         console.log(error.message)
@@ -293,22 +295,48 @@ const slotCreation = async (req, res) => {
 
     }
 }
+const editProfile = async (req, res) => {
+    try {
+        const { name, mobile, experience, bio, speciality, photo, id } = req.body;
 
-const slotList = async(req,res)=>{
-    try{
+        const photoResult = await cloudinary.uploader.upload(photo, { folder: 'doctorPhotos' });
+        console.log(photoResult);
+
+        const doctor = await Doctor.findOneAndUpdate(
+            { _id: id },
+            {
+                $set: {
+                    name: name,
+                    mobile: mobile,
+                    experience: experience,
+                    bio: bio,
+                    speciality: speciality,
+                    photo: photoResult.secure_url,
+                },
+
+            },
+            { new: true }
+        );
+
+        res.status(200).json({ message: "Doctor details updated successfully", doctor });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "Internal Server Error" });
+    }
+};
+
+
+const doctorDetails = async (req, res) => {
+    try {
         const id = req.query.id
         const doctor = await Doctor.findById(id)
-        const data = doctor.slots
-    
-        res.status(200).json({data})
+        res.status(200).json({ doctor })
 
-    }catch(error){
+
+    } catch (error) {
         console.log(error.message)
-        return res.status(500).json({ status: "Internal Server Error" });
-
     }
 }
-
 
 
 module.exports = {
@@ -319,7 +347,8 @@ module.exports = {
     specialityName,
     slotCreation,
     slotList,
-
+    editProfile,
+    doctorDetails
 
 }
 

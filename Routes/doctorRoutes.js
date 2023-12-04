@@ -17,5 +17,9 @@ DoctorRoute.post("/slotDetails",authDoc.authenticateDoctor,doctorController.slot
 
 DoctorRoute.get("/slotList",authDoc.authenticateDoctor,doctorController.slotList)
 
+DoctorRoute.get("/doctorDetails",authDoc.authenticateDoctor,doctorController.doctorDetails)
+
+DoctorRoute.post("/editProfile",authDoc.authenticateDoctor,doctorController.editProfile)
+
 
 module.exports = DoctorRoute

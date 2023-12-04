@@ -196,7 +196,7 @@ const doctorDetails = async (req, res) => {
 
 const specialityList = async (req, res) => {
     try {
-        const data = await Speciality.find()
+        const data = await Speciality.find({list:true})
         res.status(200).json({ message: "successfull", data })
         // console.log(data)
     } catch (error) {

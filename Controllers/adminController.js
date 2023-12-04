@@ -6,6 +6,8 @@ const Doctor = require("../Models/doctorModel")
 const Speciality = require("../Models/specialityModel")
 const cloudinary = require("../utils/cloudinary.js");
 const speciality = require("../Models/specialityModel");
+const Appointment = require("../Models/appointmentModel.js")
+const Payment = require("../Models/paymentModel.js")
 
 
 const adminLogin = async (req, res) => {
@@ -158,7 +160,7 @@ const unVerified = async (req, res) => {
 const unVerifiedDoctorDetails = async (req, res) => {
     try {
         const { id } = req.query; // Retrieve from query parameters
-        const details = await Doctor.findOne({ _id: id});
+        const details = await Doctor.findOne({ _id: id });
         res.status(200).json({ details });
     } catch (error) {
         console.log(error.message);
@@ -170,7 +172,7 @@ const unVerifiedDoctorDetails = async (req, res) => {
 
 const adminVerify = async (req, res) => {
     try {
-        const { id } = req.query; 
+        const { id } = req.query;
         const doctor = await Doctor.findById(id);
         const verified = doctor.admin_verify;
 
@@ -231,34 +233,34 @@ const addSpeciality = async (req, res) => {
 };
 
 
-const specialList = async(req,res) =>{
-    try{
+const specialList = async (req, res) => {
+    try {
         const data = await Speciality.find()
-      
-        res.status(200).json({data})
 
-    }catch(error){
+        res.status(200).json({ data })
+
+    } catch (error) {
         console.log(error.message)
         res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-const listUnlist = async(req,res) =>{
-    try{
-        const {id}  = req.query
+const listUnlist = async (req, res) => {
+    try {
+        const { id } = req.query
         const data = await speciality.findById(id)
-        console.log(data,'ddddddddddddddata')
+        console.log(data, 'ddddddddddddddata')
 
-        if(data.list){
+        if (data.list) {
             data.list = false
-        }else{
+        } else {
             data.list = true
         }
 
         await data.save()
-        res.status(200).json({message:"Successfull"})
+        res.status(200).json({ message: "Successfull" })
 
-    }catch(error){
+    } catch (error) {
         console.log(error.message)
         res.status(500).json({ message: 'Internal server error' });
     }
@@ -307,6 +309,38 @@ const editSpeciality = async (req, res) => {
     }
 };
 
+const counts = async (req, res) => {
+    try {
+        const doctor = await Doctor.countDocuments()
+        console.log(doctor)
+        const user = await User.countDocuments()
+        console.log(user, 'kkk')
+        const totalAmount = await Payment.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: { $toDouble: "$price" } }
+                }
+            }
+        ]);
+
+        const total = totalAmount.length > 0 ? totalAmount[0].total : 0;
+
+        console.log("Total amount:", total);
+        const thirtyPercent = total * 0.3;
+
+        console.log("30% of the total amount:", thirtyPercent);
+
+
+
+        res.status(200).json({ doctor, user, total, thirtyPercent })
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({ message: 'Internal server error' });
+
+    }
+}
+
 
 
 
@@ -329,6 +363,7 @@ module.exports = {
     specialList,
     listUnlist,
     editSpeciality,
+    counts
 
 
 };
