@@ -227,7 +227,20 @@ const slotCreation = async (req, res) => {
         // Ensure date is a valid JavaScript Date object
         const parsedDate = new Date(date);
 
-        // No need to create originalDate if you want to use the date as it is
+        const currentDate = new Date();
+        if (parsedDate <= currentDate) {
+            return res.status(400).send({
+                success: false,
+                message: "Invalid date. Slot creation allowed only for future dates.",
+            });
+        }
+        // Ensure startTime is less than endTime
+        if (startTime >= endTime) {
+            return res.status(400).send({
+                success: false,
+                message: "Invalid time range. Starting time must be less than ending time.",
+            });
+        }
 
         const isExist = await Doctor.findOne({
             _id: id,
@@ -297,10 +310,10 @@ const slotList = async (req, res) => {
 }
 const editProfile = async (req, res) => {
     try {
-        const { name, mobile, experience, bio, speciality, photo, id } = req.body;
+        const { name, mobile, experience, bio, speciality, id } = req.body;
 
-        const photoResult = await cloudinary.uploader.upload(photo, { folder: 'doctorPhotos' });
-        console.log(photoResult);
+        // const photoResult = await cloudinary.uploader.upload(photo, { folder: 'doctorPhotos' });
+        // console.log(photoResult);
 
         const doctor = await Doctor.findOneAndUpdate(
             { _id: id },
@@ -311,7 +324,7 @@ const editProfile = async (req, res) => {
                     experience: experience,
                     bio: bio,
                     speciality: speciality,
-                    photo: photoResult.secure_url,
+                    // photo: photoResult.secure_url,
                 },
 
             },

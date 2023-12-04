@@ -41,6 +41,8 @@ AdminRoute.patch("/editSpeciality", auth.authenticateAdmin, adminController.edit
 
 AdminRoute.get("/counts", auth.authenticateAdmin, adminController.counts)
 
+AdminRoute.get("/appointmentList", auth.authenticateAdmin, adminController.appointmentList)
+
 
 
 

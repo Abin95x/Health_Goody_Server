@@ -3,9 +3,8 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const User = require("../Models/userModel")
 const Doctor = require("../Models/doctorModel")
-const Speciality = require("../Models/specialityModel")
 const cloudinary = require("../utils/cloudinary.js");
-const speciality = require("../Models/specialityModel");
+const Speciality = require("../Models/specialityModel");
 const Appointment = require("../Models/appointmentModel.js")
 const Payment = require("../Models/paymentModel.js")
 
@@ -248,7 +247,7 @@ const specialList = async (req, res) => {
 const listUnlist = async (req, res) => {
     try {
         const { id } = req.query
-        const data = await speciality.findById(id)
+        const data = await Speciality.findById(id)
         console.log(data, 'ddddddddddddddata')
 
         if (data.list) {
@@ -341,6 +340,17 @@ const counts = async (req, res) => {
     }
 }
 
+const appointmentList = async (req, res) => {
+    try {
+        const data = await Appointment.find()
+        console.log(data, "z")
+        res.status(200).json(data)
+
+    } catch (error) {
+        console.log(message)
+    }
+}
+
 
 
 
@@ -363,7 +373,8 @@ module.exports = {
     specialList,
     listUnlist,
     editSpeciality,
-    counts
+    counts,
+    appointmentList
 
 
 };
