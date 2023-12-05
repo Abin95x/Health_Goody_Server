@@ -131,13 +131,15 @@ userRoute.get("/doctorList", authUser.authenticateUser, userController.doctorLis
 
 userRoute.get("/doctorDetails/:id", authUser.authenticateUser, userController.doctorDetails)
 
-userRoute.get("/specialityList",userController.specialityList)
+userRoute.get("/specialityList", userController.specialityList)
 
-userRoute.get("/slotList",authUser.authenticateUser,userController.slotList)
+userRoute.get("/slotList", authUser.authenticateUser, userController.slotList)
 
-userRoute.post("/makePayment",authUser.authenticateUser,userController.makePayment)
+userRoute.post("/makePayment", authUser.authenticateUser, userController.makePayment)
 
-userRoute.post("/makeAppointment",authUser.authenticateUser,userController.makeAppointment)
+userRoute.post("/makeAppointment", authUser.authenticateUser, userController.makeAppointment)
+
+userRoute.get("/appointmentList", authUser.authenticateUser, userController.appointmentList)
 
 
 

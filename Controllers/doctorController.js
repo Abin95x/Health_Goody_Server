@@ -280,6 +280,8 @@ const slotCreation = async (req, res) => {
                 },
             }
         );
+        
+        console.log(doctor)
 
         res.status(200).send({
             success: true,
@@ -352,6 +354,8 @@ const doctorDetails = async (req, res) => {
 }
 
 
+
+
 module.exports = {
     doctorRegistration,
     otpVerify,
@@ -361,7 +365,8 @@ module.exports = {
     slotCreation,
     slotList,
     editProfile,
-    doctorDetails
+    doctorDetails,
+
 
 }
 

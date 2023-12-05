@@ -11,6 +11,8 @@ const Otp = require("../Models/userOtpModel.js")
 const cloudinary = require("../utils/cloudinary.js")
 const Speciality = require("../Models/specialityModel.js")
 const moment = require('moment');
+const AppointmentModel = require("../Models/appointmentModel.js")
+
 
 
 
@@ -196,7 +198,7 @@ const doctorDetails = async (req, res) => {
 
 const specialityList = async (req, res) => {
     try {
-        const data = await Speciality.find({list:true})
+        const data = await Speciality.find({ list: true })
         res.status(200).json({ message: "successfull", data })
         // console.log(data)
     } catch (error) {
@@ -236,7 +238,6 @@ const makePayment = async (req, res) => {
     try {
         const { price, date, _id, drId, select } = req.body;
 
-        // Assuming date is already in ISO format, no need to convert it
         const selectedDate = moment(date);
 
         // console.log(date, 'original date');
@@ -251,8 +252,8 @@ const makePayment = async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `http://localhost:3000/success?_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
-            cancel_url: `http://localhost:3000/cancel`,
+            success_url: `http://localhost:3000/success?status=true&success_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
+            cancel_url: `http://localhost:3000/success`,
         });
 
         res.status(200).json({ session });
@@ -265,7 +266,7 @@ const makePayment = async (req, res) => {
 
 const makeAppointment = async (req, res) => {
     try {
-        // Destructuring request body
+        
         const { drId, _id, date, select } = req.body;
         const price = "299";
 
@@ -314,13 +315,28 @@ const makeAppointment = async (req, res) => {
         const appointmentData = await appointment.save();
 
         // Sending Response
-        res.status(200).json({ paymentData, appointmentData });
+        res.status(200).json({ paymentData, appointmentData ,message:'Payment is success'});
 
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+const appointmentList = async (req, res) => {
+    try {
+        const id = req.query.id
+        const data = await AppointmentModel.find({ user: id })
+        console.log(data, 'dfdfdfdfddataaa')
+        res.status(200).json(data)
+
+
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 
 
 
@@ -342,6 +358,7 @@ module.exports = {
     specialityList,
     slotList,
     makePayment,
-    makeAppointment
+    makeAppointment,
+    appointmentList
 }
 

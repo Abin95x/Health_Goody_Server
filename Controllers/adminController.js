@@ -271,12 +271,9 @@ const editSpeciality = async (req, res) => {
         const editedName = req.body.values.edit;
         const photo = req.body.values.photo;
 
-        // Validate inputs
         if (!id || !editedName) {
             return res.status(400).json({ message: 'Missing required parameters' });
         }
-
-        // Add additional validation for editedName, if needed
 
         const existing = await Speciality.findOne({
             speciality: { $regex: new RegExp('^' + editedName + '$', 'i') },
@@ -288,9 +285,7 @@ const editSpeciality = async (req, res) => {
 
         let photoUrl;
 
-        // Check if a photo is provided
         if (photo) {
-            // Add validation for photo URL, if needed
             const photoResult = await cloudinary.uploader.upload(photo, { folder: 'specialitysvg' });
             photoUrl = photoResult.secure_url;
         }
@@ -325,12 +320,7 @@ const counts = async (req, res) => {
 
         const total = totalAmount.length > 0 ? totalAmount[0].total : 0;
 
-        console.log("Total amount:", total);
         const thirtyPercent = total * 0.3;
-
-        console.log("30% of the total amount:", thirtyPercent);
-
-
 
         res.status(200).json({ doctor, user, total, thirtyPercent })
     } catch (error) {
@@ -343,7 +333,6 @@ const counts = async (req, res) => {
 const appointmentList = async (req, res) => {
     try {
         const data = await Appointment.find()
-        console.log(data, "z")
         res.status(200).json(data)
 
     } catch (error) {
