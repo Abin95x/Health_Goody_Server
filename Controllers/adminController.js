@@ -6,7 +6,8 @@ const Doctor = require("../Models/doctorModel")
 const cloudinary = require("../utils/cloudinary.js");
 const Speciality = require("../Models/specialityModel");
 const Appointment = require("../Models/appointmentModel.js")
-const Payment = require("../Models/paymentModel.js")
+const Payment = require("../Models/paymentModel.js");
+const { query } = require("express");
 
 
 const adminLogin = async (req, res) => {
@@ -234,15 +235,33 @@ const addSpeciality = async (req, res) => {
 
 const specialList = async (req, res) => {
     try {
-        const data = await Speciality.find()
+        const { limit, currentPage } = req.query;
+        console.log(limit, currentPage);
 
-        res.status(200).json({ data })
+        const page = parseInt(currentPage);
+        const lim = parseInt(limit);
 
+        const startIndex = (page - 1) * lim;
+
+        const totalItems = await Speciality.countDocuments();
+        const data = await Speciality.find().skip(startIndex).limit(lim).sort({ speciality: 1 });
+
+
+        const results = {
+            data: data,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItems / lim),
+                totalItems: totalItems,
+            },
+        };
+
+        res.status(200).json(results);
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
 
 const listUnlist = async (req, res) => {
     try {

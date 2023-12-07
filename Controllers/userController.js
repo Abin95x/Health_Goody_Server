@@ -252,7 +252,7 @@ const makePayment = async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `http://localhost:3000/success?status=true&success_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
+            success_url: `http://localhost:3000/success?status=true&success&_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
             cancel_url: `http://localhost:3000/success`,
         });
 
@@ -323,17 +323,81 @@ const makeAppointment = async (req, res) => {
     }
 };
 
+
+
 const appointmentList = async (req, res) => {
     try {
-        const id = req.query.id
-        const data = await AppointmentModel.find({ user: id })
-        console.log(data, 'dfdfdfdfddataaa')
-        res.status(200).json(data)
+        const id = req.query.id;
+        console.log(id);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 2;
 
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        
+        const data = await AppointmentModel.aggregate([
+            { 
+                $lookup: {
+                    from: 'doctors',
+                    localField: 'doctor',
+                    foreignField: '_id',
+                    as: 'doctorDetails'
+                }
+            },
+            {
+                $unwind: '$doctorDetails'
+            },
+            {
+                $sort: {createdAt: -1,}
+            },
+            {
+                $skip: startIndex
+            },
+            {
+                $limit: limit
+            },
+            
+        ]);
+        
+        
 
+        // Format dates using moment
+        const formattedData = data.map(appointment => ({
+            ...appointment,
+            createdAt: moment(new Date(appointment.createdAt)).format('YYYY-MM-DD '),
+            consultationDate: moment(new Date(appointment.consultationDate)).format('YYYY-MM-DD '),
+            // Add more fields with date values if needed
+        }));
+        
 
+        const totalItems = await AppointmentModel.countDocuments({ user: id });
+
+        const results = {
+            data: formattedData,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItems / limit),
+                totalItems: totalItems,
+            },
+        };
+
+        res.status(200).json(results);
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+
+const drData = async (req,res)=>{
+    try{
+        const {drId} =req.query
+        console.log(drId,'jdhfjhfjdhfjdhfjdhfdjfhjdfjdhfjdhfjdhfjdhfdjhfjdhfjdhfjdhfjdhfjdfjdhfjdhfjdhfjdfjdh')
+        // const data = 
+        
+    }catch(error){
+        console.log(error.message)
     }
 }
 
@@ -359,6 +423,7 @@ module.exports = {
     slotList,
     makePayment,
     makeAppointment,
-    appointmentList
+    appointmentList,
+    drData
 }
 
