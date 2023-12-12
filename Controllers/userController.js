@@ -158,18 +158,51 @@ const setDetails = async (req, res) => {
     }
 };
 
-
 const doctorList = async (req, res) => {
     try {
-        const doctors = await Doctor.find({ is_blocked: false })
-        res.status(200).json({ doctors })
+        const { search, select, page, count, sort } = req.query;
+        const query = { is_blocked: false };
 
+        if (search) {
+            query.$or = [
+                { name: { $regex: new RegExp(search, 'i') } },
+                { speciality: { $regex: new RegExp(search, 'i') } }
+            ];
+        }
+
+        if (select) {
+            query.speciality = select;
+        }
+
+        // Find total count of doctors without pagination
+        const totalDoctorsCount = await Doctor.countDocuments(query);
+
+        let doctors;
+
+        if (sort === 'experience') {
+            // If sorting by experience
+            doctors = await Doctor.find(query)
+                .sort({ experience: -1 })
+                .skip((page - 1) * count)
+                .limit(parseInt(count));
+        } else {
+            // Default sorting or other sorting options
+            doctors = await Doctor.find(query)
+                .skip((page - 1) * count)
+                .limit(parseInt(count));
+        }
+
+        // Send response with doctors and total count
+        res.status(200).json({ doctors, totalCount: totalDoctorsCount });
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
         res.status(500).json({ message: "Internal Server Error" });
-
     }
-}
+};
+
+
+
+
 
 const getProfileData = async (req, res) => {
     try {
@@ -236,12 +269,17 @@ const stripe = require('stripe')('sk_test_51OIn6JSGxvp5pPKvKDRLk0eSdUKaFzQwiFZDU
 
 const makePayment = async (req, res) => {
     try {
+        console.log('1')
         const { price, date, _id, drId, select } = req.body;
+        console.log('1')
+        
 
         const selectedDate = moment(date);
+        console.log('1')
 
-        // console.log(date, 'original date');
-        // console.log(selectedDate.format(), 'formatted date');
+
+        console.log(date, 'original date');
+        console.log(selectedDate.format(), 'formatted date');
 
         const session = await stripe.checkout.sessions.create({
             billing_address_collection: 'auto',
@@ -255,6 +293,7 @@ const makePayment = async (req, res) => {
             success_url: `http://localhost:3000/success?status=true&success&_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
             cancel_url: `http://localhost:3000/success`,
         });
+        console.log('1')
 
         res.status(200).json({ session });
     } catch (error) {
@@ -324,11 +363,11 @@ const makeAppointment = async (req, res) => {
 };
 
 
+const mongoose = require("mongoose")
 
 const appointmentList = async (req, res) => {
     try {
         const id = req.query.id;
-        console.log(id);
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 2;
 
@@ -336,6 +375,12 @@ const appointmentList = async (req, res) => {
         const endIndex = page * limit;
         
         const data = await AppointmentModel.aggregate([
+            {
+                $match: {
+                    // Match appointments for a specific user id
+                    'user': new mongoose.Types.ObjectId(id)
+                }
+            },
             { 
                 $lookup: {
                     from: 'doctors',
@@ -348,7 +393,7 @@ const appointmentList = async (req, res) => {
                 $unwind: '$doctorDetails'
             },
             {
-                $sort: {createdAt: -1,}
+                $sort: { createdAt: -1 }
             },
             {
                 $skip: startIndex
@@ -356,10 +401,7 @@ const appointmentList = async (req, res) => {
             {
                 $limit: limit
             },
-            
         ]);
-        
-        
 
         // Format dates using moment
         const formattedData = data.map(appointment => ({
@@ -368,12 +410,17 @@ const appointmentList = async (req, res) => {
             consultationDate: moment(new Date(appointment.consultationDate)).format('YYYY-MM-DD '),
             // Add more fields with date values if needed
         }));
-        
+
+        const date = new Date();
+        const currentDate = moment(date).format('YYYY MM DD');
+        const currentTime = moment(date).format('HH:mm');
 
         const totalItems = await AppointmentModel.countDocuments({ user: id });
 
         const results = {
             data: formattedData,
+            currentDate: currentDate,
+            currentTime: currentTime,
             pagination: {
                 currentPage: page,
                 totalPages: Math.ceil(totalItems / limit),
@@ -389,17 +436,54 @@ const appointmentList = async (req, res) => {
 };
 
 
+const cancelAppointment = async (req, res) => {
+    try {
+        const { id } = req.query;
 
-const drData = async (req,res)=>{
-    try{
-        const {drId} =req.query
-        console.log(drId,'jdhfjhfjdhfjdhfjdhfdjfhjdfjdhfjdhfjdhfjdhfdjhfjdhfjdhfjdhfjdhfjdfjdhfjdhfjdhfjdfjdh')
-        // const data = 
-        
-    }catch(error){
-        console.log(error.message)
+        const data = await AppointmentModel.aggregate([
+            {
+                $lookup: {
+                    from: 'doctors',
+                    localField: 'doctor',
+                    foreignField: '_id',
+                    as: 'doctorDetails',
+                },
+            },
+            {
+                $unwind: '$doctorDetails',
+            },
+        ]);
+
+        // Find the appointment in the data
+        const appointment = data.find(appointment => appointment._id.toString() === id);
+        console.log(appointment)
+
+        // Update the booked field to false in the timeSlots array
+        appointment.doctorDetails.slots[0].timeSlots.forEach(timeSlot => {
+            timeSlot.booked = false;
+        });
+
+        // Save the updated doctorDetails back to the database
+        await Doctor.findByIdAndUpdate(
+            appointment.doctorDetails._id,
+            { $set: { slots: appointment.doctorDetails.slots } },
+            { new: true }
+        );
+
+        // Perform the appointment cancellation
+        await AppointmentModel.findByIdAndDelete(id);
+
+        res.status(200).json({ message: 'Appointment cancelled' });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-}
+};
+
+
+
+
+
 
 
 
@@ -424,6 +508,6 @@ module.exports = {
     makePayment,
     makeAppointment,
     appointmentList,
-    drData
+    cancelAppointment
 }
 

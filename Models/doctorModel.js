@@ -51,6 +51,7 @@ const doctorSchema = new mongoose.Schema({
     // ],
     experience: {
         type: String,
+        default: 0
     },
     bio: {
         type: String,

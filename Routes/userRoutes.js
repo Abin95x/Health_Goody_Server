@@ -141,7 +141,7 @@ userRoute.post("/makeAppointment", authUser.authenticateUser, userController.mak
 
 userRoute.get("/appointmentList", authUser.authenticateUser, userController.appointmentList)
 
-userRoute.get("/drData",authUser.authenticateUser, userController.drData)
+userRoute.patch("/cancelAppointment",authUser.authenticateUser,userController.cancelAppointment)
 
 
 

@@ -9,6 +9,7 @@ const cloudinary = require("../utils/cloudinary.js")
 const Speciality = require("../Models/specialityModel.js")
 const { ObjectId } = require("mongodb");
 const moment = require('moment');
+const AppointmentModel = require("../Models/appointmentModel.js")
 
 
 let otpId
@@ -354,6 +355,77 @@ const doctorDetails = async (req, res) => {
 }
 
 
+const appointmentList = async (req, res) => {
+    try {
+        const id = req.query.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 2;
+
+        console.log(id,page,limit)
+
+        const startIndex = (page - 1) * limit;
+        // const endIndex = page * limit;
+        
+        const data = await AppointmentModel.aggregate([
+            { 
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'userDetails'
+                }
+            },
+            {
+                $unwind: '$userDetails'
+            },
+            {
+                $sort: {createdAt: -1,}
+            },
+            {
+                $skip: startIndex
+            },
+            {
+                $limit: limit
+            },
+            
+        ]);
+        console.log(data)
+        
+        
+
+        // Format dates using moment
+        const formattedData = data.map(appointment => ({
+            ...appointment,
+            createdAt: moment(new Date(appointment.createdAt)).format('YYYY-MM-DD '),
+            consultationDate: moment(new Date(appointment.consultationDate)).format('YYYY-MM-DD '),
+            // Add more fields with date values if needed
+        }));
+        const date = new Date();
+        const currentDate = moment(date).format('YYYY MM DD');
+        const currentTime = moment(date).format('HH:mm');
+
+        
+        const totalItems = await AppointmentModel.countDocuments({ user: id });
+
+        const results = {
+            data: formattedData,
+            currentDate:currentDate,
+            currentTime:currentTime,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItems / limit),
+                totalItems: totalItems,
+            },
+        };
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
 
 
 module.exports = {
@@ -366,6 +438,7 @@ module.exports = {
     slotList,
     editProfile,
     doctorDetails,
+    appointmentList,
 
 
 }
