@@ -122,7 +122,6 @@ userRoute.post("/resendOtp", userController.resendOtp)
  */
 userRoute.post("/userLogin", userController.userLogin)
 
-
 userRoute.post("/setDetails", authUser.authenticateUser, userController.setDetails)
 
 userRoute.get('/profileData/:id', authUser.authenticateUser, userController.getProfileData)
@@ -143,6 +142,7 @@ userRoute.get("/appointmentList", authUser.authenticateUser, userController.appo
 
 userRoute.patch("/cancelAppointment",authUser.authenticateUser,userController.cancelAppointment)
 
+userRoute.post("/createChat",authUser.authenticateUser,userController.createChat)
 
 
 

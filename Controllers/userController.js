@@ -12,7 +12,7 @@ const cloudinary = require("../utils/cloudinary.js")
 const Speciality = require("../Models/specialityModel.js")
 const moment = require('moment');
 const AppointmentModel = require("../Models/appointmentModel.js")
-
+const chatModal = require("../Models/chatModal.js")
 
 
 
@@ -481,7 +481,28 @@ const cancelAppointment = async (req, res) => {
 };
 
 
+const createChat = async(req,res)=>{
+    try{
+    
+        const {userid,doctorid}=req.body
+        
+        const chatExist = await chatModal.findOne({
+            members:{$all: [userid,doctorid]}
+        })
+        if(!chatExist){
+            const newChat = new chatModal({
+                members:[userid.toString(), doctorid.toString()]
+            })
+            await newChat.save()
+            res.status(200).json({message:'Your are connected'})
 
+        }
+        res.status(200).json({message:'You are connected'})
+
+    }catch(error){
+        console.log(error.message)
+    }
+}
 
 
 
@@ -508,6 +529,7 @@ module.exports = {
     makePayment,
     makeAppointment,
     appointmentList,
-    cancelAppointment
+    cancelAppointment,
+    createChat
 }
 

@@ -60,6 +60,9 @@ app.use("/doctor", doctorRoute)
 const adminRoute = require("./Routes/adminRoutes")
 app.use("/admin", adminRoute)
 
+const chatRoute = require("./Routes/chatRoutes")
+app.use("/chat",chatRoute)
+
 
 app.listen(PORT, () => {
   console.log(`server running on port http://localhost:${PORT}`)
