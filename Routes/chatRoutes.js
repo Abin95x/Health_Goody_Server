@@ -7,3 +7,4 @@ chatRoute.get('/userData/:id',chatController.userData)
 chatRoute.get("/chat/:id",chatController.userChats)
 
 module.exports = chatRoute
+    

@@ -50,6 +50,10 @@ app.use(
   })
 );
 
+// app.use((req, res, next) => {
+//   console.log(req);
+//   next()
+// })
 
 const userRoute = require("./Routes/userRoutes")
 app.use("/", userRoute)
@@ -62,6 +66,9 @@ app.use("/admin", adminRoute)
 
 const chatRoute = require("./Routes/chatRoutes")
 app.use("/chat",chatRoute)
+
+const messageRoute = require("./Routes/messageRoute")
+app.use('/message',messageRoute)
 
 
 app.listen(PORT, () => {

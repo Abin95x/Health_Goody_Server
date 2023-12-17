@@ -8,7 +8,6 @@ const Doctor = require('../Models/doctorModel')
 const doctorData = async (req,res) => {
     try {
       const {id} = req.params
-      console.log(id)
       const result = await Doctor.findOne({_id:id})
       res.status(200).json(result)
     } catch (error) {

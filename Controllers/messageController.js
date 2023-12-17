@@ -3,7 +3,8 @@ const Message = require('../Models/messageModel')
 
 const addMessage = async (req,res) => {
     try {
-      const {chatId,text,senderId} = req.sanitisedData
+      const {chatId,text,senderId} = req.body
+      console.log(req.body);
       const message = new Message({chatId,text,senderId})
   
       const result = await message.save()
@@ -16,8 +17,11 @@ const addMessage = async (req,res) => {
   
 const getMessages = async (req,res) => {
     try {
-      const {chatId} = req.params
-      const result = await Message.find({chatId})
+      const {id} = req.params
+      console.log(id)
+      //console.log(id,"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+      const result = await Message.find({chatId: id})
+      console.log(result)
       res.status(200).json(result)
     } catch (error) {
       console.log(error.message);
