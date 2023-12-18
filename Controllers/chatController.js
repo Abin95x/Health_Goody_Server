@@ -20,7 +20,10 @@ const doctorData = async (req,res) => {
 const userData = async (req,res) => {
     try {
       const {id} = req.params
+
+
       const result = await User.findOne({_id:id})
+     
       res.status(200).json(result)
     } catch (error) {
       console.log(error.message);
@@ -30,7 +33,7 @@ const userData = async (req,res) => {
 
 
 const userChats = async(req,res)=>{
-    try{
+    try{ 
       const {id} = req.params
       const userId = id
       const chats = await Chat.aggregate([

@@ -10,6 +10,7 @@ const Speciality = require("../Models/specialityModel.js")
 const { ObjectId } = require("mongodb");
 const moment = require('moment');
 const AppointmentModel = require("../Models/appointmentModel.js")
+const chatModal = require("../Models/chatModal.js")
 
 
 let otpId
@@ -354,63 +355,66 @@ const doctorDetails = async (req, res) => {
     }
 }
 
+const mongoose = require("mongoose")
 
 const appointmentList = async (req, res) => {
     try {
-        const id = req.query.id;
+        const doctorId = req.query.id;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 2;
 
-        console.log(id,page,limit)
+        console.log(doctorId, page, limit);
 
         const startIndex = (page - 1) * limit;
-        // const endIndex = page * limit;
-        
+
         const data = await AppointmentModel.aggregate([
-            { 
+            {
+                $match: {
+                    // doctor: mongoose.Types.ObjectId(doctorId),
+                    'doctor': new mongoose.Types.ObjectId(doctorId)
+                },
+            },
+            {
                 $lookup: {
                     from: 'users',
                     localField: 'user',
                     foreignField: '_id',
-                    as: 'userDetails'
-                }
+                    as: 'userDetails',
+                },
             },
             {
-                $unwind: '$userDetails'
+                $unwind: '$userDetails',
             },
             {
-                $sort: {createdAt: -1,}
+                $sort: { createdAt: -1 },
             },
             {
-                $skip: startIndex
+                $skip: startIndex,
             },
             {
-                $limit: limit
+                $limit: limit,
             },
-            
         ]);
         console.log(data)
-        
-        
 
         // Format dates using moment
-        const formattedData = data.map(appointment => ({
+        const formattedData = data.map((appointment) => ({
             ...appointment,
             createdAt: moment(new Date(appointment.createdAt)).format('YYYY-MM-DD '),
             consultationDate: moment(new Date(appointment.consultationDate)).format('YYYY-MM-DD '),
             // Add more fields with date values if needed
         }));
+
         const date = new Date();
         const currentDate = moment(date).format('YYYY MM DD');
         const currentTime = moment(date).format('HH:mm');
 
-        
-        const totalItems = await AppointmentModel.countDocuments({ user: id });
+        const totalItems = await AppointmentModel.countDocuments({ doctor: doctorId });
 
         const results = {
             data: formattedData,
-            currentDate:currentDate,
-            currentTime:currentTime,
+            currentDate: currentDate,
+            currentTime: currentTime,
             pagination: {
                 currentPage: page,
                 totalPages: Math.ceil(totalItems / limit),
@@ -426,6 +430,32 @@ const appointmentList = async (req, res) => {
 };
 
 
+const createChat = async(req,res)=>{
+    try{
+    
+        const {userid,doctorid}=req.body
+        
+        const chatExist = await chatModal.findOne({
+            members:{$all: [userid,doctorid]}
+        })
+        if(!chatExist){
+            const newChat = new chatModal({
+                members:[userid.toString(), doctorid.toString()]
+            })
+            await newChat.save()
+            res.status(200).json({message:'Your are connected'})
+
+        }
+        res.status(200).json({message:'You are connected'})
+
+    }catch(error){
+        console.log(error.message)
+    }
+}
+
+
+
+
 
 
 module.exports = {
@@ -439,6 +469,7 @@ module.exports = {
     editProfile,
     doctorDetails,
     appointmentList,
+    createChat,
 
 
 }

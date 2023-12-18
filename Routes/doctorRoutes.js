@@ -23,5 +23,7 @@ DoctorRoute.post("/editProfile",authDoc.authenticateDoctor,doctorController.edit
 
 DoctorRoute.get('/appointmentList',authDoc.authenticateDoctor,doctorController.appointmentList)
 
+DoctorRoute.post('/createChat',authDoc.authenticateDoctor,doctorController.createChat)
+
 
 module.exports = DoctorRoute

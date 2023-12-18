@@ -1,9 +1,10 @@
 const express = require('express')
 const app = express()
-
+const socketConnection = require("./socketIo")
 require("dotenv").config()
 const cors = require('cors')
 const PORT = process.env.PORT || 3000;
+const http = require("http")
 
 
 
@@ -50,10 +51,6 @@ app.use(
   })
 );
 
-// app.use((req, res, next) => {
-//   console.log(req);
-//   next()
-// })
 
 const userRoute = require("./Routes/userRoutes")
 app.use("/", userRoute)
@@ -71,8 +68,10 @@ const messageRoute = require("./Routes/messageRoute")
 app.use('/message',messageRoute)
 
 
-app.listen(PORT, () => {
-  console.log(`server running on port http://localhost:${PORT}`)
-})
 
+const server = http.createServer(app)
+socketConnection(server)
+server.listen(PORT,()=>{
+  console.log(`server running on port http://localhost:${PORT}`);
+})
 
