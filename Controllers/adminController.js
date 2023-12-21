@@ -236,7 +236,6 @@ const addSpeciality = async (req, res) => {
 const specialList = async (req, res) => {
     try {
         const { limit, currentPage } = req.query;
-        console.log(limit, currentPage);
 
         const page = parseInt(currentPage);
         const lim = parseInt(limit);
@@ -267,7 +266,6 @@ const listUnlist = async (req, res) => {
     try {
         const { id } = req.query
         const data = await Speciality.findById(id)
-        console.log(data, 'ddddddddddddddata')
 
         if (data.list) {
             data.list = false
@@ -325,9 +323,9 @@ const editSpeciality = async (req, res) => {
 const counts = async (req, res) => {
     try {
         const doctor = await Doctor.countDocuments()
-        console.log(doctor)
+
         const user = await User.countDocuments()
-        console.log(user, 'kkk')
+
         const totalAmount = await Payment.aggregate([
             {
                 $group: {

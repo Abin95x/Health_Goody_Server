@@ -269,17 +269,11 @@ const stripe = require('stripe')('sk_test_51OIn6JSGxvp5pPKvKDRLk0eSdUKaFzQwiFZDU
 
 const makePayment = async (req, res) => {
     try {
-        console.log('1')
+
         const { price, date, _id, drId, select } = req.body;
-        console.log('1')
-        
 
         const selectedDate = moment(date);
-        console.log('1')
 
-
-        console.log(date, 'original date');
-        console.log(selectedDate.format(), 'formatted date');
 
         const session = await stripe.checkout.sessions.create({
             billing_address_collection: 'auto',
@@ -293,7 +287,7 @@ const makePayment = async (req, res) => {
             success_url: `http://localhost:3000/success?status=true&success&_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
             cancel_url: `http://localhost:3000/success`,
         });
-        console.log('1')
+
 
         res.status(200).json({ session });
     } catch (error) {
@@ -305,7 +299,7 @@ const makePayment = async (req, res) => {
 
 const makeAppointment = async (req, res) => {
     try {
-        
+
         const { drId, _id, date, select } = req.body;
         const price = "299";
 
@@ -354,7 +348,7 @@ const makeAppointment = async (req, res) => {
         const appointmentData = await appointment.save();
 
         // Sending Response
-        res.status(200).json({ paymentData, appointmentData ,message:'Payment is success'});
+        res.status(200).json({ paymentData, appointmentData, message: 'Payment is success' });
 
     } catch (error) {
         console.error(error.message);
@@ -373,7 +367,7 @@ const appointmentList = async (req, res) => {
 
         const startIndex = (page - 1) * limit;
         const endIndex = page * limit;
-        
+
         const data = await AppointmentModel.aggregate([
             {
                 $match: {
@@ -381,7 +375,7 @@ const appointmentList = async (req, res) => {
                     'user': new mongoose.Types.ObjectId(id)
                 }
             },
-            { 
+            {
                 $lookup: {
                     from: 'doctors',
                     localField: 'doctor',
@@ -456,7 +450,6 @@ const cancelAppointment = async (req, res) => {
 
         // Find the appointment in the data
         const appointment = data.find(appointment => appointment._id.toString() === id);
-        console.log(appointment)
 
         // Update the booked field to false in the timeSlots array
         appointment.doctorDetails.slots[0].timeSlots.forEach(timeSlot => {
@@ -481,25 +474,25 @@ const cancelAppointment = async (req, res) => {
 };
 
 
-const createChat = async(req,res)=>{
-    try{
-    
-        const {userid,doctorid}=req.body
-        
+const createChat = async (req, res) => {
+    try {
+
+        const { userid, doctorid } = req.body
+
         const chatExist = await chatModal.findOne({
-            members:{$all: [userid,doctorid]}
+            members: { $all: [userid, doctorid] }
         })
-        if(!chatExist){
+        if (!chatExist) {
             const newChat = new chatModal({
-                members:[userid.toString(), doctorid.toString()]
+                members: [userid.toString(), doctorid.toString()]
             })
             await newChat.save()
-            res.status(200).json({message:'Your are connected'})
+            res.status(200).json({ message: 'Your are connected' })
 
         }
-        res.status(200).json({message:'You are connected'})
+        res.status(200).json({ message: 'You are connected' })
 
-    }catch(error){
+    } catch (error) {
         console.log(error.message)
     }
 }

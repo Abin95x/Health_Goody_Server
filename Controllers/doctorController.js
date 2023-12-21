@@ -224,6 +224,13 @@ const generateTimeSlots = (start, end, duration) => {
 const slotCreation = async (req, res) => {
     try {
         const { startTime, endTime, slotDuration, date } = req.body.formData;
+        if (!date) {
+            return res.status(400).send({
+                success: false,
+                message: "Invalid date.",
+            });
+        }
+
         const id = req.body.id;
 
         // Ensure date is a valid JavaScript Date object
@@ -282,8 +289,7 @@ const slotCreation = async (req, res) => {
                 },
             }
         );
-        
-        console.log(doctor)
+
 
         res.status(200).send({
             success: true,
@@ -363,8 +369,6 @@ const appointmentList = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 2;
 
-        console.log(doctorId, page, limit);
-
         const startIndex = (page - 1) * limit;
 
         const data = await AppointmentModel.aggregate([
@@ -395,7 +399,6 @@ const appointmentList = async (req, res) => {
                 $limit: limit,
             },
         ]);
-        console.log(data)
 
         // Format dates using moment
         const formattedData = data.map((appointment) => ({
@@ -430,25 +433,25 @@ const appointmentList = async (req, res) => {
 };
 
 
-const createChat = async(req,res)=>{
-    try{
-    
-        const {userid,doctorid}=req.body
-        
+const createChat = async (req, res) => {
+    try {
+
+        const { userid, doctorid } = req.body
+
         const chatExist = await chatModal.findOne({
-            members:{$all: [userid,doctorid]}
+            members: { $all: [userid, doctorid] }
         })
-        if(!chatExist){
+        if (!chatExist) {
             const newChat = new chatModal({
-                members:[userid.toString(), doctorid.toString()]
+                members: [userid.toString(), doctorid.toString()]
             })
             await newChat.save()
-            res.status(200).json({message:'Your are connected'})
+            res.status(200).json({ message: 'Your are connected' })
 
         }
-        res.status(200).json({message:'You are connected'})
+        res.status(200).json({ message: 'You are connected' })
 
-    }catch(error){
+    } catch (error) {
         console.log(error.message)
     }
 }
