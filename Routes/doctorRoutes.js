@@ -11,19 +11,21 @@ DoctorRoute.post("/doctorResendOtp", doctorController.resendOtp)
 
 DoctorRoute.post("/doctorLogin", doctorController.doctorLogin)
 
-DoctorRoute.get("/specialityName",doctorController.specialityName)
+DoctorRoute.get("/specialityName", doctorController.specialityName)
 
-DoctorRoute.post("/slotDetails",authDoc.authenticateDoctor,doctorController.slotCreation)
+DoctorRoute.post("/slotDetails", authDoc.authenticateDoctor, doctorController.slotCreation)
 
-DoctorRoute.get("/slotList",authDoc.authenticateDoctor,doctorController.slotList)
+DoctorRoute.get("/slotList", authDoc.authenticateDoctor, doctorController.slotList)
 
-DoctorRoute.get("/doctorDetails",authDoc.authenticateDoctor,doctorController.doctorDetails)
+DoctorRoute.get("/doctorDetails", authDoc.authenticateDoctor, doctorController.doctorDetails)
 
-DoctorRoute.post("/editProfile",authDoc.authenticateDoctor,doctorController.editProfile)
+DoctorRoute.post("/editProfile", authDoc.authenticateDoctor, doctorController.editProfile)
 
-DoctorRoute.get('/appointmentList',authDoc.authenticateDoctor,doctorController.appointmentList)
+DoctorRoute.get('/appointmentList', authDoc.authenticateDoctor, doctorController.appointmentList)
 
-DoctorRoute.post('/createChat',authDoc.authenticateDoctor,doctorController.createChat)
+DoctorRoute.post('/createChat', authDoc.authenticateDoctor, doctorController.createChat)
+
+DoctorRoute.post('/priscription', authDoc.authenticateDoctor, doctorController.addPriscription)
 
 
 module.exports = DoctorRoute

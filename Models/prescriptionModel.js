@@ -1,29 +1,27 @@
 const mongoose = require('mongoose')
+const appointment = require('./appointmentModel')
 
 const prescriptionSchema = mongoose.Schema({
-    doctorName:{
-        type:String
+    doctorName: {
+        type: String
     },
-    userName:{
-        type:String
+    userName: {
+        type: String
     },
-    medicines:[
-        {
-            name:{
-                type:String
-            },
-            duration:{
-                type:String
-            },
-            Frequency:{
-                type:String
-            }
-        }
-    ],
-    text:{
-        type:String
-    }
-},{timeStamp:true})
+    date: {
+        type: String
+    },
+    medicines: {
+        type: Array
+    },
+    note: {
+        type: String
+    },
+    appointmentId: {
+        type: String
 
-const prescription = mongoose.model("Prescription",prescriptionSchema)
+    }
+}, { timestamps: true })
+
+const prescription = mongoose.model("Prescription", prescriptionSchema)
 module.exports = prescription

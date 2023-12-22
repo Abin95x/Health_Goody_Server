@@ -1,7 +1,6 @@
 const { Server } = require("socket.io");
 
 function socketConnection(server) {
-    console.log(server)
   const io = new Server(server, {
     cors: {
       origin: "http://localhost:3000",
@@ -24,12 +23,13 @@ function socketConnection(server) {
           userId: userId,
           socketId: socket.id,
         });
+
       }
       io.emit("get-users", activeUsers);
       socket.join(123);
       socket.emit("connected");
     });
-    
+
 
     socket.on("send_message", (data) => {
       socket.to(123).emit("recieve_message", data);
@@ -38,4 +38,4 @@ function socketConnection(server) {
 
   });
 }
-module.exports=socketConnection;
+module.exports = socketConnection;

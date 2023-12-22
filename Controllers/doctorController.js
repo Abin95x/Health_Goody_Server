@@ -11,7 +11,8 @@ const { ObjectId } = require("mongodb");
 const moment = require('moment');
 const AppointmentModel = require("../Models/appointmentModel.js")
 const chatModal = require("../Models/chatModal.js")
-
+const prescriptionModal = require('../Models/prescriptionModel.js')
+const User = require("../Models/userModel")
 
 let otpId
 
@@ -456,6 +457,45 @@ const createChat = async (req, res) => {
     }
 }
 
+const addPriscription = async (req, res) => {
+    try {
+        const { date, start, end, userId, drId, note, medicines, appoId } = req.body;
+        // Basic validation checks
+        if (!date || !start || !end || !userId || !drId || !note || !medicines) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        const user = await User.findById(userId);
+        const doctor = await Doctor.findById(drId);
+
+        // Check if user and doctor exist
+        if (!user || !doctor) {
+            return res.status(404).json({ message: 'User or Doctor not found' });
+        }
+
+        console.log(user.name);
+        console.log(doctor.name);
+        console.log(date, start, end, userId, drId, note, medicines);
+
+        const prescription = new prescriptionModal({
+            doctorName: doctor.name,
+            userName: user.name,
+            medicines: medicines,
+            date: moment(date).format('YYYY MM DD'),
+            note: note,
+            appointmentId: appoId
+        });
+
+        await prescription.save();
+
+        res.status(200).json({ message: 'Prescription added' });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+
 
 
 
@@ -473,6 +513,7 @@ module.exports = {
     doctorDetails,
     appointmentList,
     createChat,
+    addPriscription
 
 
 }
