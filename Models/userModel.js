@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    email:{
+    email: {
         type: String,
         required: true,
     },
@@ -14,8 +14,8 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     password: {
-        type:String,
-        required:true,
+        type: String,
+        required: true,
     },
     otp_verified: {
         type: Boolean,
@@ -25,19 +25,23 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    age:{
-        type:Number
+    age: {
+        type: Number
     },
-    photo:{
-        type:String
+    photo: {
+        type: String
     },
-    gender:{
-        type:String
+    gender: {
+        type: String
 
-    }
-    
-     
+    },
+    wallet: {
+        type: Number,
+        default: 0
+    },
+
+
 })
 
-const User = mongoose.model("User",userSchema)
+const User = mongoose.model("User", userSchema)
 module.exports = User

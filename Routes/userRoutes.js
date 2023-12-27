@@ -30,9 +30,11 @@ userRoute.post("/makeAppointment", authUser.authenticateUser, userController.mak
 
 userRoute.get("/appointmentList", authUser.authenticateUser, userController.appointmentList)
 
-userRoute.patch("/cancelAppointment",authUser.authenticateUser,userController.cancelAppointment)
+userRoute.patch("/cancelAppointment", authUser.authenticateUser, userController.cancelAppointment)
 
-userRoute.post("/createChat",authUser.authenticateUser,userController.createChat)
+userRoute.post("/createChat", authUser.authenticateUser, userController.createChat)
+
+userRoute.get('/medicineDetails', authUser.authenticateUser, userController.medicineDetails)
 
 
 

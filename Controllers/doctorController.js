@@ -238,7 +238,7 @@ const slotCreation = async (req, res) => {
         const parsedDate = new Date(date);
 
         const currentDate = new Date();
-        if (parsedDate <= currentDate) {
+        if (parsedDate < currentDate) {
             return res.status(400).send({
                 success: false,
                 message: "Invalid date. Slot creation allowed only for future dates.",
@@ -305,20 +305,32 @@ const slotCreation = async (req, res) => {
 
 
 
+
 const slotList = async (req, res) => {
     try {
-        const id = req.query.id
-        const doctor = await Doctor.findById(id)
-        const data = doctor.slots
+        const id = req.query.id;
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        const doctor = await Doctor.findById(id);
+        const allSlots = doctor.slots;
+        const reversedSlots = allSlots.slice().reverse();
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = page * pageSize;
+        const slots = reversedSlots.slice(startIndex, endIndex);
 
-        res.status(200).json({ data })
-
+        res.status(200).json({
+            data: slots,
+            totalPages: Math.ceil(allSlots.length / pageSize),
+            currentPage: page
+        });
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
         return res.status(500).json({ status: "Internal Server Error" });
-
     }
-}
+};
+
+
+
 const editProfile = async (req, res) => {
     try {
         const { name, mobile, experience, bio, speciality, id } = req.body;

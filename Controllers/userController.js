@@ -3,16 +3,17 @@ const jwt = require("jsonwebtoken")
 require("dotenv").config()
 const sendEmail = require("../utils/nodeMailer.js")
 const securePassword = require("../utils/securePassword.js")
+const moment = require('moment');
+const cloudinary = require("../utils/cloudinary.js")
+
 const User = require("../Models/userModel")
 const Doctor = require("../Models/doctorModel.js")
 const Payment = require("../Models/paymentModel.js")
-const Appointment = require("../Models/appointmentModel.js")
 const Otp = require("../Models/userOtpModel.js")
-const cloudinary = require("../utils/cloudinary.js")
 const Speciality = require("../Models/specialityModel.js")
-const moment = require('moment');
 const AppointmentModel = require("../Models/appointmentModel.js")
-const chatModal = require("../Models/chatModal.js")
+const ChatModal = require("../Models/chatModal.js")
+const PrescriptionModel = require('../Models/prescriptionModel.js')
 
 
 
@@ -335,7 +336,7 @@ const makeAppointment = async (req, res) => {
         }, null);
 
         // Creating an Appointment
-        const appointment = new Appointment({
+        const appointment = new AppointmentModel({
             doctor: drId,
             user: _id,
             paymentId: paymentData._id,
@@ -479,11 +480,11 @@ const createChat = async (req, res) => {
 
         const { userid, doctorid } = req.body
 
-        const chatExist = await chatModal.findOne({
+        const chatExist = await ChatModal.findOne({
             members: { $all: [userid, doctorid] }
         })
         if (!chatExist) {
-            const newChat = new chatModal({
+            const newChat = new ChatModal({
                 members: [userid.toString(), doctorid.toString()]
             })
             await newChat.save()
@@ -494,6 +495,17 @@ const createChat = async (req, res) => {
 
     } catch (error) {
         console.log(error.message)
+    }
+}
+
+const medicineDetails = async (req, res) => {
+    try {
+        const { id } = req.query
+        const result = await PrescriptionModel.find({ appointmentId: id })
+        console.log(result);
+        res.status(200).json({ result })
+    } catch (error) {
+        console.log(error.message);
     }
 }
 
@@ -523,6 +535,7 @@ module.exports = {
     makeAppointment,
     appointmentList,
     cancelAppointment,
-    createChat
+    createChat,
+    medicineDetails
 }
 
