@@ -12,6 +12,10 @@ userRoute.post("/resendOtp", userController.resendOtp)
 
 userRoute.post("/userLogin", userController.userLogin)
 
+userRoute.get("/forgotPass", userController.forgotPass)
+
+userRoute.patch("/resetPassword", userController.resetPass)
+
 userRoute.post("/setDetails", authUser.authenticateUser, userController.setDetails)
 
 userRoute.get('/profileData/:id', authUser.authenticateUser, userController.getProfileData)
@@ -35,6 +39,7 @@ userRoute.patch("/cancelAppointment", authUser.authenticateUser, userController.
 userRoute.post("/createChat", authUser.authenticateUser, userController.createChat)
 
 userRoute.get('/medicineDetails', authUser.authenticateUser, userController.medicineDetails)
+
 
 
 

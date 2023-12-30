@@ -7,7 +7,7 @@ const cloudinary = require("../utils/cloudinary.js");
 const Speciality = require("../Models/specialityModel");
 const Appointment = require("../Models/appointmentModel.js")
 const Payment = require("../Models/paymentModel.js");
-const { query } = require("express");
+
 
 
 const adminLogin = async (req, res) => {
@@ -235,16 +235,23 @@ const addSpeciality = async (req, res) => {
 
 const specialList = async (req, res) => {
     try {
-        const { limit, currentPage } = req.query;
-
+        const { limit, currentPage, search } = req.query;
         const page = parseInt(currentPage);
         const lim = parseInt(limit);
-
         const startIndex = (page - 1) * lim;
 
-        const totalItems = await Speciality.countDocuments();
-        const data = await Speciality.find().skip(startIndex).limit(lim).sort({ speciality: 1 });
+        let query = {}; // Initial query object
 
+        if (search) {
+            // If search parameter is provided, add a regex condition for 'speciality'
+            query.speciality = { $regex: new RegExp(search, 'i') };
+        }
+
+        const totalItems = await Speciality.countDocuments(query);
+        const data = await Speciality.find(query)
+            .skip(startIndex)
+            .limit(lim)
+            .sort({ speciality: 1 });
 
         const results = {
             data: data,
@@ -261,6 +268,7 @@ const specialList = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 const listUnlist = async (req, res) => {
     try {

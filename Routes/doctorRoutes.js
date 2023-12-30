@@ -11,6 +11,10 @@ DoctorRoute.post("/doctorResendOtp", doctorController.resendOtp)
 
 DoctorRoute.post("/doctorLogin", doctorController.doctorLogin)
 
+DoctorRoute.get("/forgotPass", doctorController.forgotPass)
+
+DoctorRoute.patch("/resetPassword", doctorController.resetPass)
+
 DoctorRoute.get("/specialityName", doctorController.specialityName)
 
 DoctorRoute.post("/slotDetails", authDoc.authenticateDoctor, doctorController.slotCreation)

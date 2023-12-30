@@ -5,7 +5,7 @@ const sendEmail = require("../utils/nodeMailer.js")
 const securePassword = require("../utils/securePassword.js")
 const moment = require('moment');
 const cloudinary = require("../utils/cloudinary.js")
-
+const nodemailer = require("nodemailer")
 const User = require("../Models/userModel")
 const Doctor = require("../Models/doctorModel.js")
 const Payment = require("../Models/paymentModel.js")
@@ -61,6 +61,7 @@ const otpVerify = async (req, res) => {
         if (otpData && expiresAt < Date.now()) {
             return res.status(401).json({ message: "Email OTP has expired" });
         }
+
         if (correctOtp === otp) {
             await Otp.deleteMany({ userId: userId });
             await User.updateOne(
@@ -145,6 +146,84 @@ const userLogin = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+
+const forgotPass = async (req, res) => {
+    try {
+        const { email } = req.query
+        const secret = process.env.SECRET_KEY_USER
+        const isUser = await User.findOne({ email: email });
+        if (!isUser) {
+            return res.status(401).json({ message: "User is not regitered" });
+        }
+        const token = jwt.sign({ id: isUser._id }, secret, { expiresIn: "5m" });
+        let transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.PASSWORD,
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: "Forgot password",
+            text: `http://localhost:3000/resetpassword/${isUser._id}/${token}`,
+        };
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.error("Error sending email:", error);
+                return res
+                    .status(500)
+                    .json({ message: "Failed to send email for password reset." });
+            } else {
+                console.log("Email sent:", info.response);
+                return res
+                    .status(200)
+                    .json({ message: "Email sent successfully for password reset." });
+
+            }
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+const resetPass = async (req, res) => {
+    try {
+        console.log('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
+        const { id, token, password } = req.query
+        console.log(id, token, password);
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(401).json({ message: "user not found" });
+        }
+        try {
+            const verify = jwt.verify(token, process.env.SECRET_KEY_USER);
+            if (verify) {
+                const hashedPassword = await bcrypt.hash(password, 10);
+                await User.findByIdAndUpdate(
+                    { _id: id },
+                    { $set: { password: hashedPassword } }
+                );
+                return res
+                    .status(200)
+                    .json({ message: "Successfully changed password" });
+            }
+        } catch (error) {
+            console.log(error.message);
+            return res.status(400).json({ message: "Something wrong with token" });
+        }
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
@@ -433,7 +512,7 @@ const appointmentList = async (req, res) => {
 
 const cancelAppointment = async (req, res) => {
     try {
-        const { id } = req.query;
+        const { id, userId } = req.query;
 
         const data = await AppointmentModel.aggregate([
             {
@@ -466,6 +545,9 @@ const cancelAppointment = async (req, res) => {
 
         // Perform the appointment cancellation
         await AppointmentModel.findByIdAndDelete(id);
+
+        await User.findByIdAndUpdate(userId, { $inc: { wallet: 299 } }, { new: true })
+
 
         res.status(200).json({ message: 'Appointment cancelled' });
     } catch (error) {
@@ -525,6 +607,8 @@ module.exports = {
     otpVerify,
     resendOtp,
     userLogin,
+    forgotPass,
+    resetPass,
     setDetails,
     doctorList,
     doctorDetails,

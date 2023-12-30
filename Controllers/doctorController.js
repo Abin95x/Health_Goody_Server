@@ -6,6 +6,7 @@ const securePassword = require("../utils/securePassword.js")
 const Otp = require("../Models/doctorOtpModel.js")
 const Doctor = require("../Models/doctorModel.js")
 const cloudinary = require("../utils/cloudinary.js")
+const nodemailer = require("nodemailer")
 const Speciality = require("../Models/specialityModel.js")
 const { ObjectId } = require("mongodb");
 const moment = require('moment');
@@ -169,6 +170,82 @@ const doctorLogin = async (req, res) => {
     }
 }
 
+const forgotPass = async (req, res) => {
+    try {
+        const { email } = req.query
+        const secret = process.env.SECRET_KEY_DOCTOR
+        const isDoctor = await Doctor.findOne({ email: email });
+        if (!isDoctor) {
+            return res.status(401).json({ message: "Doctor is not regitered" });
+        }
+        const token = jwt.sign({ id: isDoctor._id }, secret, { expiresIn: "5m" });
+        let transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.PASSWORD,
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: "Forgot password",
+            text: `http://localhost:3000/doctor/resetpassword/${isDoctor._id}/${token}`,
+        };
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.error("Error sending email:", error);
+                return res
+                    .status(500)
+                    .json({ message: "Failed to send email for password reset." });
+            } else {
+                console.log("Email sent:", info.response);
+                return res
+                    .status(200)
+                    .json({ message: "Email sent successfully for password reset." });
+
+            }
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+const resetPass = async (req, res) => {
+    try {
+        const { id, token, password } = req.query
+        console.log(id, token, password);
+        const doctor = await Doctor.findById(id);
+        if (!doctor) {
+            return res.status(401).json({ message: "Doctor not found" });
+        }
+        try {
+            const verify = jwt.verify(token, process.env.SECRET_KEY_DOCTOR);
+            if (verify) {
+                const hashedPassword = await bcrypt.hash(password, 10);
+                await Doctor.findByIdAndUpdate(
+                    { _id: id },
+                    { $set: { password: hashedPassword } }
+                );
+                return res
+                    .status(200)
+                    .json({ message: "Successfully changed password" });
+            }
+        } catch (error) {
+            console.log(error.message);
+            return res.status(400).json({ message: "Something wrong with token" });
+        }
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
 const specialityName = async (req, res) => {
     try {
         const data = await Speciality.find()
@@ -310,7 +387,7 @@ const slotList = async (req, res) => {
     try {
         const id = req.query.id;
         const page = parseInt(req.query.page) || 1;
-        const pageSize = parseInt(req.query.pageSize) || 10;
+        const pageSize = parseInt(req.query.pageSize) || 2;
         const doctor = await Doctor.findById(id);
         const allSlots = doctor.slots;
         const reversedSlots = allSlots.slice().reverse();
@@ -380,14 +457,14 @@ const appointmentList = async (req, res) => {
     try {
         const doctorId = req.query.id;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 2;
+        const limit = parseInt(req.query.limit) || 5;
+
 
         const startIndex = (page - 1) * limit;
 
         const data = await AppointmentModel.aggregate([
             {
                 $match: {
-                    // doctor: mongoose.Types.ObjectId(doctorId),
                     'doctor': new mongoose.Types.ObjectId(doctorId)
                 },
             },
@@ -518,6 +595,8 @@ module.exports = {
     otpVerify,
     resendOtp,
     doctorLogin,
+    forgotPass,
+    resetPass,
     specialityName,
     slotCreation,
     slotList,
