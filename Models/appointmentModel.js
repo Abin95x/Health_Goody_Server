@@ -21,7 +21,7 @@ const appointmentSchema = new mongoose.Schema({
     status: {
         type: String,
         trim: true,
-        default: "pending",
+        default: "Pending",
     },
     consultationDate: {
         type: String,
@@ -35,7 +35,7 @@ const appointmentSchema = new mongoose.Schema({
     paymentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: Payment,
-        required:true
+        required: true
     },
     slotId: {
         type: String,

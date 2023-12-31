@@ -584,6 +584,26 @@ const addPriscription = async (req, res) => {
     }
 };
 
+const markAsDone = async (req, res) => {
+    try {
+        const { id } = req.query;
+        console.log(id);
+
+        // Assuming your AppointmentModel has a 'status' field
+        const result = await AppointmentModel.findByIdAndUpdate(
+            id,
+            { $set: { status: 'Done' } },
+            { new: true } // Return the updated document
+        );
+
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+
 
 
 
@@ -604,7 +624,8 @@ module.exports = {
     doctorDetails,
     appointmentList,
     createChat,
-    addPriscription
+    addPriscription,
+    markAsDone
 
 
 }

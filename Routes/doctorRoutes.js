@@ -31,5 +31,7 @@ DoctorRoute.post('/createChat', authDoc.authenticateDoctor, doctorController.cre
 
 DoctorRoute.post('/priscription', authDoc.authenticateDoctor, doctorController.addPriscription)
 
+DoctorRoute.patch('/markAsDone', authDoc.authenticateDoctor, doctorController.markAsDone)
+
 
 module.exports = DoctorRoute
