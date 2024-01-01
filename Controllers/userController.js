@@ -431,7 +431,7 @@ const makeAppointment = async (req, res) => {
         res.status(200).json({ paymentData, appointmentData, message: 'Payment is success' });
 
     } catch (error) {
-        console.error(error.message);
+        console.log(error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
@@ -591,6 +591,90 @@ const medicineDetails = async (req, res) => {
     }
 }
 
+const walletPayment = async (req, res) => {
+    try {
+        const { date, _id, drId, select } = req.body;
+        const price = 299;
+        const userData = await User.findById(_id);
+
+        if (!userData) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        if (userData.wallet < price) {
+            console.log("Wallet balance is less than 299");
+            res.status(200).json({ message: 'Insufficient Balance' });
+        } else {
+            // Decrease the wallet amount
+            let newWalletAmount = userData.wallet - price;
+
+            // Update the user's wallet with the new amount
+            await User.findByIdAndUpdate(_id, { wallet: newWalletAmount });
+
+            const selectDate = moment(date);
+            const payment = new Payment({
+                doctor: drId,
+                user: _id,
+                price: price,
+            });
+
+            const paymentData = await payment.save();
+
+            const updatedDoctor = await Doctor.findOneAndUpdate(
+                { _id: drId, 'slots.timeSlots.objectId': select },
+                { $set: { 'slots.$[outer].timeSlots.$[inner].booked': true } },
+                {
+                    arrayFilters: [
+                        { 'outer._id': { $exists: true } },
+                        { 'inner.objectId': select },
+                    ],
+                    new: true, // Return the modified document
+                }
+            );
+
+            const selectedSlot = updatedDoctor.slots.reduce((found, ts) => {
+                const slot = ts.timeSlots.find((item) => item.objectId === select);
+                if (slot) {
+                    found = slot;
+                }
+                return found;
+            }, null);
+
+            const appointment = new AppointmentModel({
+                doctor: drId,
+                user: _id,
+                paymentId: paymentData._id,
+                slotId: select,
+                consultationDate: selectDate,
+                start: selectedSlot.start,
+                end: selectedSlot.end,
+            });
+
+            const appointmentData = await appointment.save();
+
+            res.status(201).json({ paymentData, appointmentData, message: 'Payment is success' });
+        }
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+const addReview = async (req, res) => {
+    try {
+        const { userId, drId, review, rating } = req.body
+        console.log(userId, review, rating, drId);
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+
+    }
+}
+
 
 
 
@@ -620,6 +704,8 @@ module.exports = {
     appointmentList,
     cancelAppointment,
     createChat,
-    medicineDetails
+    medicineDetails,
+    walletPayment,
+    addReview
 }
 

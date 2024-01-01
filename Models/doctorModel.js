@@ -1,4 +1,6 @@
 const mongoose = require("mongoose")
+const User = require("./userModel")
+
 
 const doctorSchema = new mongoose.Schema({
     name: {
@@ -56,10 +58,6 @@ const doctorSchema = new mongoose.Schema({
     bio: {
         type: String,
     },
-    rating: {
-        type: Number
-    },
-    // availability: [daySchema],
     slots: [
         {
             date: {
@@ -87,6 +85,18 @@ const doctorSchema = new mongoose.Schema({
             }
         },
     ],
+    review: [
+        {
+            text: String,
+            star: Number,
+            postedBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: User,
+            },
+            postedDate: { type: Date }
+        }
+    ]
+
 
 })
 

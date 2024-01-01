@@ -40,8 +40,9 @@ userRoute.post("/createChat", authUser.authenticateUser, userController.createCh
 
 userRoute.get('/medicineDetails', authUser.authenticateUser, userController.medicineDetails)
 
+userRoute.post("/walletPayment", authUser.authenticateUser, userController.walletPayment)
 
-
+userRoute.post("/addReview", authUser.authenticateUser, userController.addReview)
 
 
 
