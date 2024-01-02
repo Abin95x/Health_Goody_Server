@@ -44,6 +44,9 @@ AdminRoute.get("/counts", auth.authenticateAdmin, adminController.counts)
 AdminRoute.get("/appointmentList", auth.authenticateAdmin, adminController.appointmentList)
 
 
+AdminRoute.get('/adminReport', auth.authenticateAdmin, adminController.adminReport)
+
+
 
 
 module.exports = AdminRoute

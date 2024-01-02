@@ -512,7 +512,13 @@ const appointmentList = async (req, res) => {
 
 const cancelAppointment = async (req, res) => {
     try {
-        const { id, userId } = req.query;
+        const { id, userId, paymentId } = req.query;
+
+        // Delete the payment
+        await Payment.findByIdAndDelete(paymentId);
+
+        // Update the appointment status to Cancelled
+        await AppointmentModel.findByIdAndUpdate(id, { $set: { status: 'Cancelled' } }, { new: true });
 
         const data = await AppointmentModel.aggregate([
             {
@@ -543,18 +549,16 @@ const cancelAppointment = async (req, res) => {
             { new: true }
         );
 
-        // Perform the appointment cancellation
-        await AppointmentModel.findByIdAndDelete(id);
+        // Refund the user's wallet
+        await User.findByIdAndUpdate(userId, { $inc: { wallet: 299 } }, { new: true });
 
-        await User.findByIdAndUpdate(userId, { $inc: { wallet: 299 } }, { new: true })
-
-
-        res.status(200).json({ message: 'Appointment cancelled' });
+        res.status(200).json({ message: 'Appointment cancelled successfully' });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 
 
 const createChat = async (req, res) => {
@@ -667,6 +671,21 @@ const addReview = async (req, res) => {
     try {
         const { userId, drId, review, rating } = req.body
         console.log(userId, review, rating, drId);
+        const doctor = await Doctor.findById(drId)
+        if (!doctor) {
+            res.status(404).json({ message: 'Doctor not found' })
+        }
+
+        const newReview = {
+            text: review,
+            star: rating,
+            postedBy: userId,
+            postedDate: new Date()
+        }
+
+        doctor.review.push(newReview);
+        await doctor.save()        // Save the updated doctor object
+        res.status(200).json({ message: 'Review added successfully', review: newReview });
 
     } catch (error) {
         console.log(error.message);
@@ -674,6 +693,38 @@ const addReview = async (req, res) => {
 
     }
 }
+
+const getReview = async (req, res) => {
+    try {
+        const { id } = req.query;
+        console.log(id);
+
+        const doctor = await Doctor.findById(id).populate({
+            path: 'review.postedBy',
+            model: 'User',
+            select: 'name email photo' // You can choose which user details to select
+        });
+        const reviewDetails = doctor.review.map(review => ({
+            text: review.text,
+            star: review.star,
+            postedBy: {
+                name: review.postedBy.name,
+                email: review.postedBy.email,
+                photo: review.postedBy.photo
+            },
+            postedDate: review.postedDate
+        }));
+        // console.log(reviewDetails);
+
+        res.status(200).json({ reviews: reviewDetails });
+
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 
 
 
@@ -706,6 +757,7 @@ module.exports = {
     createChat,
     medicineDetails,
     walletPayment,
-    addReview
+    addReview,
+    getReview
 }
 

@@ -44,6 +44,8 @@ userRoute.post("/walletPayment", authUser.authenticateUser, userController.walle
 
 userRoute.post("/addReview", authUser.authenticateUser, userController.addReview)
 
+userRoute.get("/getReview", authUser.authenticateUser, userController.getReview)
+
 
 
 

@@ -235,23 +235,16 @@ const addSpeciality = async (req, res) => {
 
 const specialList = async (req, res) => {
     try {
-        const { limit, currentPage, search } = req.query;
+        const { limit, currentPage } = req.query;
+
         const page = parseInt(currentPage);
         const lim = parseInt(limit);
+
         const startIndex = (page - 1) * lim;
 
-        let query = {}; // Initial query object
+        const totalItems = await Speciality.countDocuments();
+        const data = await Speciality.find().skip(startIndex).limit(lim).sort({ speciality: 1 });
 
-        if (search) {
-            // If search parameter is provided, add a regex condition for 'speciality'
-            query.speciality = { $regex: new RegExp(search, 'i') };
-        }
-
-        const totalItems = await Speciality.countDocuments(query);
-        const data = await Speciality.find(query)
-            .skip(startIndex)
-            .limit(lim)
-            .sort({ speciality: 1 });
 
         const results = {
             data: data,
@@ -343,10 +336,8 @@ const counts = async (req, res) => {
             }
         ]);
 
-        const total = totalAmount.length > 0 ? totalAmount[0].total : 0;
-
-        const thirtyPercent = total * 0.3;
-
+        const total = totalAmount.length > 0 ? Math.round(totalAmount[0].total) : 0;
+        const thirtyPercent = Math.round(total * 0.3);
         res.status(200).json({ doctor, user, total, thirtyPercent })
     } catch (error) {
         console.log(error.message)
@@ -362,6 +353,93 @@ const appointmentList = async (req, res) => {
 
     } catch (error) {
         console.log(message)
+    }
+}
+
+const adminReport = async (req, res) => {
+    try {
+        const currentDate = new Date();
+        // const currentMonth = currentDate.getMonth() + 1;
+        const monthName = currentDate.toLocaleString("default", { month: "long" });
+        let date = new Date();
+        let year = date.getFullYear();
+        let currentYear = new Date(year, 0, 1);
+        let users = []
+        let usersByYear = await User.aggregate([
+            {
+                $match: { createdAt: { $gte: currentYear }, is_blocked: { $ne: true } },
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%m", date: "$createdAt" } },
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { _id: 1 } },
+        ]);
+        for (let i = 1; i <= 12; i++) {
+            let result = true;
+            for (let j = 0; j < usersByYear.length; j++) {
+                result = false;
+                if (usersByYear[j]._id == i) {
+                    users.push(usersByYear[j]);
+                    break;
+                } else {
+                    result = true;
+                }
+            }
+            if (result) users.push({ _id: i, count: 0 });
+        }
+        let usersData = [];
+        for (let i = 0; i < users.length; i++) {
+            usersData.push(users[i].count);
+        }
+        console.log(usersData, 'useeeeeeeeeeeeeeeeeeeeeeer');
+
+        let doctors = []
+        let doctorsByYear = await Doctor.aggregate([
+            {
+                $match: { createdAt: { $gte: currentYear }, is_blocked: { $ne: true } },
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%m", date: "$createdAt" } },
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { _id: 1 } },
+        ]);
+        for (let i = 1; i <= 12; i++) {
+            let result = true;
+            for (let j = 0; j < doctorsByYear.length; j++) {
+                result = false;
+                if (doctorsByYear[j]._id == i) {
+                    doctors.push(doctorsByYear[j]);
+                    break;
+                } else {
+                    result = true;
+                }
+            }
+            if (result) doctors.push({ _id: i, count: 0 });
+        }
+        let doctorsData = [];
+        for (let i = 0; i < doctors.length; i++) {
+            doctorsData.push(doctors[i].count);
+        }
+
+        console.log(doctorsData, 'drrrrrrrrrrrrrrrrrrrrrr');
+        const result = {
+            currentMonthName: monthName,
+            doctorsData,
+            usersData,
+        }
+
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ status: "Internal Server Error" });
+
     }
 }
 
@@ -388,7 +466,8 @@ module.exports = {
     listUnlist,
     editSpeciality,
     counts,
-    appointmentList
+    appointmentList,
+    adminReport,
 
 
 };
