@@ -40,8 +40,28 @@ const adminLogin = async (req, res) => {
 
 const userList = async (req, res) => {
     try {
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const totalItems = await User.countDocuments();
+
+
         const users = await User.find()
-        res.status(200).json({ users })
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+
+        const results = {
+            users: users,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItems / limit),
+                totalItems: totalItems,
+            },
+        };
+
+        res.status(200).json(results);
 
     } catch (error) {
         console.log(error.message)
@@ -92,8 +112,25 @@ const blockUnblock = async (req, res) => {
 
 const doctorList = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const totalItems = await Doctor.countDocuments();
+
         const doctors = await Doctor.find({ admin_verify: true, otp_verified: true })
-        res.status(200).json({ doctors })
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const results = {
+            doctors: doctors,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItems / limit),
+                totalItems: totalItems,
+            },
+        };
+
+        res.status(200).json(results);
 
     } catch (error) {
         console.log(error.message)
@@ -146,8 +183,26 @@ const blockApprove = async (req, res) => {
 
 const unVerified = async (req, res) => {
     try {
-        const doctors = await Doctor.find({ otp_verified: true, admin_verify: false });
-        res.status(200).json({ doctors })
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const totalItems = await Doctor.countDocuments();
+
+        const doctors = await Doctor.find({ otp_verified: true, admin_verify: false })
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const results = {
+            doctors: doctors,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItems / limit),
+                totalItems: totalItems,
+            },
+        };
+
+        res.status(200).json(results);
+
 
     } catch (error) {
         console.log(error.message)
@@ -235,7 +290,7 @@ const addSpeciality = async (req, res) => {
 
 const specialList = async (req, res) => {
     try {
-        const { limit, currentPage } = req.query;
+        const { limit, currentPage, } = req.query;
 
         const page = parseInt(currentPage);
         const lim = parseInt(limit);
@@ -348,13 +403,33 @@ const counts = async (req, res) => {
 
 const appointmentList = async (req, res) => {
     try {
-        const data = await Appointment.find()
-        res.status(200).json(data)
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
 
+        const totalItems = await Appointment.countDocuments(); // Calculate total items
+
+        const data = await Appointment.find()
+            .sort({ createdAt: -1 }) // Sort by createdAt in descending order (latest first)
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+
+        const results = {
+            data: data,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItems / limit),
+                totalItems: totalItems,
+            },
+        };
+
+        res.status(200).json(results);
     } catch (error) {
-        console.log(message)
+        console.error(error.message); // Log error for debugging
+        res.status(500).json({ error: 'Failed to fetch appointments' }); // Send error response
     }
-}
+};
+
 
 const adminReport = async (req, res) => {
     try {
@@ -394,7 +469,6 @@ const adminReport = async (req, res) => {
         for (let i = 0; i < users.length; i++) {
             usersData.push(users[i].count);
         }
-        console.log(usersData, 'useeeeeeeeeeeeeeeeeeeeeeer');
 
         let doctors = []
         let doctorsByYear = await Doctor.aggregate([
@@ -427,7 +501,6 @@ const adminReport = async (req, res) => {
             doctorsData.push(doctors[i].count);
         }
 
-        console.log(doctorsData, 'drrrrrrrrrrrrrrrrrrrrrr');
         const result = {
             currentMonthName: monthName,
             doctorsData,

@@ -241,7 +241,7 @@ const setDetails = async (req, res) => {
 const doctorList = async (req, res) => {
     try {
         const { search, select, page, count, sort } = req.query;
-        const query = { is_blocked: false };
+        const query = { is_blocked: false, admin_verify: true }; // Added admin_verify condition
 
         if (search) {
             query.$or = [
@@ -279,6 +279,7 @@ const doctorList = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
 
 
 
@@ -444,9 +445,10 @@ const appointmentList = async (req, res) => {
         const id = req.query.id;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 2;
+        console.log(id, "jkkkkkkkkkkkkkkkkkkkkkkk");
 
         const startIndex = (page - 1) * limit;
-        const endIndex = page * limit;
+        // const endIndex = page * limit;
 
         const data = await AppointmentModel.aggregate([
             {
@@ -477,13 +479,15 @@ const appointmentList = async (req, res) => {
             },
         ]);
 
+        console.log(data);
+
         // Format dates using moment
         const formattedData = data.map(appointment => ({
             ...appointment,
             createdAt: moment(new Date(appointment.createdAt)).format('YYYY-MM-DD '),
             consultationDate: moment(new Date(appointment.consultationDate)).format('YYYY-MM-DD '),
-            // Add more fields with date values if needed
         }));
+        console.log(formattedData);
 
         const date = new Date();
         const currentDate = moment(date).format('YYYY MM DD');

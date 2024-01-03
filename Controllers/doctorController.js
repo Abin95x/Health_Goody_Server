@@ -386,25 +386,23 @@ const slotCreation = async (req, res) => {
 const slotList = async (req, res) => {
     try {
         const id = req.query.id;
-        const page = parseInt(req.query.page) || 1;
-        const pageSize = parseInt(req.query.pageSize) || 2;
         const doctor = await Doctor.findById(id);
         const allSlots = doctor.slots;
+
+        // Reverse the order of slots
         const reversedSlots = allSlots.slice().reverse();
-        const startIndex = (page - 1) * pageSize;
-        const endIndex = page * pageSize;
-        const slots = reversedSlots.slice(startIndex, endIndex);
 
         res.status(200).json({
-            data: slots,
-            totalPages: Math.ceil(allSlots.length / pageSize),
-            currentPage: page
+            data: reversedSlots,
+            totalSlots: reversedSlots.length
         });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ status: "Internal Server Error" });
     }
 };
+
+
 
 
 
