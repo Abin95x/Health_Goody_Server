@@ -1,37 +1,49 @@
 const express = require("express")
-const DoctorRoute = express()
+const doctorRoute = express()
 const doctorController = require("../Controllers/doctorController")
 const authDoc = require("../Middlewares/doctorAuth")
 
-DoctorRoute.post("/doctorSignup", doctorController.doctorRegistration)
+doctorRoute.post("/doctorSignup", doctorController.doctorRegistration)
 
-DoctorRoute.post("/doctorOtpVerify", doctorController.otpVerify)
+doctorRoute.post("/doctorOtpVerify", doctorController.otpVerify)
 
-DoctorRoute.post("/doctorResendOtp", doctorController.resendOtp)
+doctorRoute.post("/doctorResendOtp", doctorController.resendOtp)
 
-DoctorRoute.post("/doctorLogin", doctorController.doctorLogin)
+doctorRoute.post("/doctorLogin", doctorController.doctorLogin)
 
-DoctorRoute.get("/forgotPass", doctorController.forgotPass)
+doctorRoute.get("/forgotPass", doctorController.forgotPass)
 
-DoctorRoute.patch("/resetPassword", doctorController.resetPass)
+doctorRoute.patch("/resetPassword", doctorController.resetPass)
 
-DoctorRoute.get("/specialityName", doctorController.specialityName)
+doctorRoute.get("/specialityName", doctorController.specialityName)
 
-DoctorRoute.post("/slotDetails", authDoc.authenticateDoctor, doctorController.slotCreation)
+doctorRoute.post("/slotDetails", authDoc.authenticateDoctor, doctorController.slotCreation)
 
-DoctorRoute.get("/slotList", authDoc.authenticateDoctor, doctorController.slotList)
+doctorRoute.get("/slotList", authDoc.authenticateDoctor, doctorController.slotList)
 
-DoctorRoute.get("/doctorDetails", authDoc.authenticateDoctor, doctorController.doctorDetails)
+doctorRoute.get("/doctorDetails", authDoc.authenticateDoctor, doctorController.doctorDetails)
 
-DoctorRoute.post("/editProfile", authDoc.authenticateDoctor, doctorController.editProfile)
+doctorRoute.post("/editProfile", authDoc.authenticateDoctor, doctorController.editProfile)
 
-DoctorRoute.get('/appointmentList', authDoc.authenticateDoctor, doctorController.appointmentList)
+doctorRoute.get('/appointmentList', authDoc.authenticateDoctor, doctorController.appointmentList)
 
-DoctorRoute.post('/createChat', authDoc.authenticateDoctor, doctorController.createChat)
+doctorRoute.post('/createChat', authDoc.authenticateDoctor, doctorController.createChat)
 
-DoctorRoute.post('/priscription', authDoc.authenticateDoctor, doctorController.addPriscription)
+doctorRoute.post('/priscription', authDoc.authenticateDoctor, doctorController.addPriscription)
 
-DoctorRoute.patch('/markAsDone', authDoc.authenticateDoctor, doctorController.markAsDone)
+doctorRoute.patch('/markAsDone', authDoc.authenticateDoctor, doctorController.markAsDone)
+
+doctorRoute.post('/addMedicalReport', authDoc.authenticateDoctor, doctorController.addMedicalReport)
+
+doctorRoute.get('/chartDetails', authDoc.authenticateDoctor, doctorController.chartDetails)
+
+doctorRoute.get('/doctorReport', authDoc.authenticateDoctor, doctorController.doctorReport)
+
+doctorRoute.get('/counts', authDoc.authenticateDoctor, doctorController.getCounts)
 
 
-module.exports = DoctorRoute
+
+
+
+
+module.exports = doctorRoute

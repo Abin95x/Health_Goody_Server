@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const appointment = require('./appointmentModel')
 
 const prescriptionSchema = mongoose.Schema({
     doctorName: {
@@ -19,7 +18,6 @@ const prescriptionSchema = mongoose.Schema({
     },
     appointmentId: {
         type: String
-
     }
 }, { timestamps: true })
 

@@ -1,52 +1,52 @@
 const express = require("express")
-const AdminRoute = express()
+const adminRoute = express()
 const adminController = require("../Controllers/adminController")
 const auth = require("../Middlewares/adminAuth")
 
 //login
 
-AdminRoute.post("/adminLogin", adminController.adminLogin)
+adminRoute.post("/adminLogin", adminController.adminLogin)
 
 //user
 
-AdminRoute.get("/userList", auth.authenticateAdmin, adminController.userList)
+adminRoute.get("/userList", auth.authenticateAdmin, adminController.userList)
 
-AdminRoute.post("/userDetails", auth.authenticateAdmin, adminController.userDetails)
+adminRoute.post("/userDetails", auth.authenticateAdmin, adminController.userDetails)
 
-AdminRoute.post("/blockUnblock", auth.authenticateAdmin, adminController.blockUnblock)
+adminRoute.post("/blockUnblock", auth.authenticateAdmin, adminController.blockUnblock)
 
 // doctor
 
-AdminRoute.get("/doctorList", auth.authenticateAdmin, adminController.doctorList)
+adminRoute.get("/doctorList", auth.authenticateAdmin, adminController.doctorList)
 
-AdminRoute.post("/doctorDetails", auth.authenticateAdmin, adminController.doctorDetails)
+adminRoute.post("/doctorDetails", auth.authenticateAdmin, adminController.doctorDetails)
 
-AdminRoute.patch("/doctorblockUnblock", auth.authenticateAdmin, adminController.blockApprove)
+adminRoute.patch("/doctorblockUnblock", auth.authenticateAdmin, adminController.blockApprove)
 
-AdminRoute.get("/unVerifiedList", auth.authenticateAdmin, adminController.unVerified)
+adminRoute.get("/unVerifiedList", auth.authenticateAdmin, adminController.unVerified)
 
-AdminRoute.get("/unVerifiedDetails", auth.authenticateAdmin, adminController.unVerifiedDoctorDetails)
+adminRoute.get("/unVerifiedDetails", auth.authenticateAdmin, adminController.unVerifiedDoctorDetails)
 
-AdminRoute.patch("/adminVerify", auth.authenticateAdmin, adminController.adminVerify)
+adminRoute.patch("/adminVerify", auth.authenticateAdmin, adminController.adminVerify)
 
 //speciality
 
-AdminRoute.post("/addSpeciality", auth.authenticateAdmin, adminController.addSpeciality)
+adminRoute.post("/addSpeciality", auth.authenticateAdmin, adminController.addSpeciality)
 
-AdminRoute.get("/specialityList", auth.authenticateAdmin, adminController.specialList)
+adminRoute.get("/specialityList", auth.authenticateAdmin, adminController.specialList)
 
-AdminRoute.patch("/listUnlist", auth.authenticateAdmin, adminController.listUnlist)
+adminRoute.patch("/listUnlist", auth.authenticateAdmin, adminController.listUnlist)
 
-AdminRoute.patch("/editSpeciality", auth.authenticateAdmin, adminController.editSpeciality)
+adminRoute.patch("/editSpeciality", auth.authenticateAdmin, adminController.editSpeciality)
 
-AdminRoute.get("/counts", auth.authenticateAdmin, adminController.counts)
+adminRoute.get("/counts", auth.authenticateAdmin, adminController.counts)
 
-AdminRoute.get("/appointmentList", auth.authenticateAdmin, adminController.appointmentList)
-
-
-AdminRoute.get('/adminReport', auth.authenticateAdmin, adminController.adminReport)
+adminRoute.get("/appointmentList", auth.authenticateAdmin, adminController.appointmentList)
 
 
+adminRoute.get('/adminReport', auth.authenticateAdmin, adminController.adminReport)
 
 
-module.exports = AdminRoute
+
+
+module.exports = adminRoute

@@ -14,6 +14,7 @@ const Speciality = require("../Models/specialityModel.js")
 const AppointmentModel = require("../Models/appointmentModel.js")
 const ChatModal = require("../Models/chatModal.js")
 const PrescriptionModel = require('../Models/prescriptionModel.js')
+const ReportModel = require("../Models/medicalReportModel.js")
 
 
 
@@ -596,6 +597,20 @@ const medicineDetails = async (req, res) => {
         res.status(200).json({ result })
     } catch (error) {
         console.log(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+const reportDetails = async (req, res) => {
+    try {
+        const { id } = req.query
+        const result = await ReportModel.findOne({ appointmentId: id })
+        console.log(result);
+        res.status(200).json({ result })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 }
 
@@ -760,6 +775,7 @@ module.exports = {
     cancelAppointment,
     createChat,
     medicineDetails,
+    reportDetails,
     walletPayment,
     addReview,
     getReview
