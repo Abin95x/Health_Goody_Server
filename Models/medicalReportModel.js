@@ -34,6 +34,9 @@ const medicalReportSchema = mongoose.Schema({
     },
     appointmentId: {
         type: String
+    },
+    additionalInfo: {
+        type: String
     }
 
 

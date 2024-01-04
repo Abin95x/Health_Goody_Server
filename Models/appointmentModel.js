@@ -28,6 +28,10 @@ const appointmentSchema = new mongoose.Schema({
     end: {
         type: String,
     },
+    rescheduled: {
+        type: Boolean,
+        default: false
+    },
     paymentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: Payment,

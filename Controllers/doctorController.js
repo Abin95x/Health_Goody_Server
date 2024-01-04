@@ -584,8 +584,6 @@ const addPriscription = async (req, res) => {
 const markAsDone = async (req, res) => {
     try {
         const { id } = req.query;
-        console.log(id);
-
         // Assuming your AppointmentModel has a 'status' field
         const result = await AppointmentModel.findByIdAndUpdate(
             id,
@@ -604,8 +602,13 @@ const markAsDone = async (req, res) => {
 const addMedicalReport = async (req, res) => {
     try {
         const { values, appoDate, appoId, drName, email, mobile, userName, } = req.body
-        console.log(values);
-        console.log(appoDate);
+
+        const existingMedicalReport = await MedicalReportModel.findOne({ appointmentId: appoId });
+
+        if (existingMedicalReport) {
+            // If appointment ID exists, return false
+            return res.status(400).json({ message: 'Medical Repor already added' });
+        }
 
         const medicalReport = new MedicalReportModel({
             patientName: userName,
@@ -618,8 +621,8 @@ const addMedicalReport = async (req, res) => {
             complaint: values.complaint,
             diagnosis: values.diagnosis,
             appointmentId: appoId,
-            investigation: values.investigation
-
+            investigation: values.investigation,
+            additionalInfo: values.additionalInfo
         })
         await medicalReport.save()
         res.status(200).json({ message: 'Medical Report added' });
@@ -633,7 +636,6 @@ const addMedicalReport = async (req, res) => {
 const chartDetails = async (req, res) => {
     try {
         const { drId } = req.query
-        console.log(drId);
         const appoPending = await AppointmentModel.countDocuments({ doctor: drId, status: "Pending" })
         const appoDone = await AppointmentModel.countDocuments({ doctor: drId, status: "Done" })
         const appoCancelled = await AppointmentModel.countDocuments({ doctor: drId, status: "Cancelled" })
@@ -706,7 +708,6 @@ const getCounts = async (req, res) => {
         const doctorId = req.query.doctorId;
 
         const doctor = await Doctor.findById(doctorId);
-        console.log(doctor);
 
         if (!doctor) {
             return res.status(404).json({ message: 'Doctor not found' });
@@ -737,6 +738,28 @@ const getCounts = async (req, res) => {
 };
 
 
+const reschedule = async () => {
+    try {
+
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: 'Internal server error' });
+
+    }
+}
+
+const cancelAppointment = async () => {
+    try {
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: 'Internal server error' });
+
+    }
+}
+
+
 
 
 
@@ -765,7 +788,9 @@ module.exports = {
     addMedicalReport,
     chartDetails,
     doctorReport,
-    getCounts
+    getCounts,
+    reschedule,
+    cancelAppointment
 
 
 }

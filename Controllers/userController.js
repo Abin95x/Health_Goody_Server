@@ -198,9 +198,7 @@ const forgotPass = async (req, res) => {
 
 const resetPass = async (req, res) => {
     try {
-        console.log('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
         const { id, token, password } = req.query
-        console.log(id, token, password);
         const user = await User.findById(id);
         if (!user) {
             return res.status(401).json({ message: "user not found" });
@@ -315,7 +313,6 @@ const specialityList = async (req, res) => {
     try {
         const data = await Speciality.find({ list: true })
         res.status(200).json({ message: "successfull", data })
-        // console.log(data)
     } catch (error) {
         console.log(error.message)
         res.status(500).json({ message: 'Internal Server Error' });
@@ -341,7 +338,7 @@ const slotList = async (req, res) => {
 
         res.status(200).json({ availableSlots });
     } catch (error) {
-        // console.error(error.message);
+        console.log(error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
@@ -446,8 +443,6 @@ const appointmentList = async (req, res) => {
         const id = req.query.id;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 2;
-        console.log(id, "jkkkkkkkkkkkkkkkkkkkkkkk");
-
         const startIndex = (page - 1) * limit;
         // const endIndex = page * limit;
 
@@ -480,15 +475,12 @@ const appointmentList = async (req, res) => {
             },
         ]);
 
-        console.log(data);
-
         // Format dates using moment
         const formattedData = data.map(appointment => ({
             ...appointment,
             createdAt: moment(new Date(appointment.createdAt)).format('YYYY-MM-DD '),
             consultationDate: moment(new Date(appointment.consultationDate)).format('YYYY-MM-DD '),
         }));
-        console.log(formattedData);
 
         const date = new Date();
         const currentDate = moment(date).format('YYYY MM DD');
@@ -593,7 +585,6 @@ const medicineDetails = async (req, res) => {
     try {
         const { id } = req.query
         const result = await PrescriptionModel.find({ appointmentId: id })
-        console.log(result);
         res.status(200).json({ result })
     } catch (error) {
         console.log(error.message);
@@ -605,7 +596,7 @@ const reportDetails = async (req, res) => {
     try {
         const { id } = req.query
         const result = await ReportModel.findOne({ appointmentId: id })
-        console.log(result);
+
         res.status(200).json({ result })
 
     } catch (error) {
@@ -626,7 +617,6 @@ const walletPayment = async (req, res) => {
         }
 
         if (userData.wallet < price) {
-            console.log("Wallet balance is less than 299");
             res.status(200).json({ message: 'Insufficient Balance' });
         } else {
             // Decrease the wallet amount
@@ -689,7 +679,6 @@ const walletPayment = async (req, res) => {
 const addReview = async (req, res) => {
     try {
         const { userId, drId, review, rating } = req.body
-        console.log(userId, review, rating, drId);
         const doctor = await Doctor.findById(drId)
         if (!doctor) {
             res.status(404).json({ message: 'Doctor not found' })
@@ -716,8 +705,6 @@ const addReview = async (req, res) => {
 const getReview = async (req, res) => {
     try {
         const { id } = req.query;
-        console.log(id);
-
         const doctor = await Doctor.findById(id).populate({
             path: 'review.postedBy',
             model: 'User',
@@ -733,7 +720,6 @@ const getReview = async (req, res) => {
             },
             postedDate: review.postedDate
         }));
-        // console.log(reviewDetails);
 
         res.status(200).json({ reviews: reviewDetails });
 

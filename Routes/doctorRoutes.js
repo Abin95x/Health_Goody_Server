@@ -41,6 +41,14 @@ doctorRoute.get('/doctorReport', authDoc.authenticateDoctor, doctorController.do
 
 doctorRoute.get('/counts', authDoc.authenticateDoctor, doctorController.getCounts)
 
+doctorRoute.patch('/reschedule', authDoc.authenticateDoctor, doctorController.reschedule)
+
+doctorRoute.patch('/cancelAppointment', authDoc.authenticateDoctor, doctorController.cancelAppointment)
+
+
+
+
+
 
 
 
