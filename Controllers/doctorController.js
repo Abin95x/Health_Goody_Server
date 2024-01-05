@@ -453,6 +453,7 @@ const doctorDetails = async (req, res) => {
 }
 
 const mongoose = require("mongoose")
+const appointment = require("../Models/appointmentModel.js")
 
 const appointmentList = async (req, res) => {
     try {
@@ -738,18 +739,44 @@ const getCounts = async (req, res) => {
 };
 
 
-const reschedule = async () => {
+
+
+const reschedule = async (req, res) => {
     try {
+        const { date, startTime, endTime, appoId } = req.body;
 
+        // Convert start time to 24-hour format
+        const startDateTime = new Date(`${date} ${startTime}`);
+        const formattedStart = startDateTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
 
+        // Convert end time to 24-hour format
+        const endDateTime = new Date(`${date} ${endTime}`);
+        const formattedEnd = endDateTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+        // Format the date using moment
+        const formattedDate = moment(date).format('YYYY-MM-DD');
+
+        // Update the appointment
+        const updatedAppointment = await AppointmentModel.findOneAndUpdate(
+            { _id: appoId },
+            { $set: { consultationDate: formattedDate, start: formattedStart, end: formattedEnd, rescheduled: true } },
+            { new: true }
+        );
+
+        if (!updatedAppointment) {
+            return res.status(404).json({ message: 'Appointment not found' });
+        }
+
+        res.status(200).json({ message: 'Appointment rescheduled successfully' });
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ message: 'Internal server error' });
-
     }
-}
+};
 
-const cancelAppointment = async () => {
+
+
+const cancelAppointment = async (req, res) => {
     try {
 
     } catch (error) {
