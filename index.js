@@ -6,11 +6,6 @@ const cors = require('cors')
 const PORT = process.env.PORT || 3000;
 const http = require("http")
 
-
-
-const swaggerJsDoc = require("swagger-jsdoc");
-const swaggerUi = require("swagger-ui-express");
-
 const dbconnect = require("./Config/dbConfig")
 dbconnect.dbconnect()
 
@@ -38,9 +33,6 @@ const options = {
   apis: ["./Routes/*.js"],
 };
 
-const swag = swaggerJsDoc(options);
-
-app.use("/apiDocs", swaggerUi.serve, swaggerUi.setup(swag));
 
 // Enable CORS for specific origin and methods
 app.use(
@@ -50,7 +42,6 @@ app.use(
     credentials: true, // Set to true if you need to include credentials
   })
 );
-
 
 const userRoute = require("./Routes/userRoutes")
 app.use("/", userRoute)
@@ -62,16 +53,15 @@ const adminRoute = require("./Routes/adminRoutes")
 app.use("/admin", adminRoute)
 
 const chatRoute = require("./Routes/chatRoutes")
-app.use("/chat",chatRoute)
+app.use("/chat", chatRoute)
 
 const messageRoute = require("./Routes/messageRoute")
-app.use('/message',messageRoute)
-
+app.use('/message', messageRoute)
 
 
 const server = http.createServer(app)
 socketConnection(server)
-server.listen(PORT,()=>{
+server.listen(PORT, () => {
   console.log(`server running on port http://localhost:${PORT}`);
 })
 

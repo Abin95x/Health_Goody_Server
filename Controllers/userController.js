@@ -16,10 +16,7 @@ const ChatModal = require("../Models/chatModal.js")
 const PrescriptionModel = require('../Models/prescriptionModel.js')
 const ReportModel = require("../Models/medicalReportModel.js")
 
-
-
 let otpId
-
 
 //user signup
 const userRegistration = async (req, res) => {
@@ -731,7 +728,27 @@ const getReview = async (req, res) => {
 };
 
 
+const editPhoto = async (req, res) => {
+    try {
+        const { img, _id } = req.body
+        const photoResult = await cloudinary.uploader.upload(img, { folder: 'doctorPhotos' });
+        const user = await User.findByIdAndUpdate(
+            _id,
+            { $set: { photo: photoResult.secure_url } },
+            { new: true }
+        );
 
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "Profile picture updated successfully", user });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: "Internal server error" });
+
+    }
+}
 
 
 
@@ -764,6 +781,7 @@ module.exports = {
     reportDetails,
     walletPayment,
     addReview,
-    getReview
+    getReview,
+    editPhoto,
 }
 

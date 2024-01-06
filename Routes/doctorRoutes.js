@@ -45,6 +45,9 @@ doctorRoute.patch('/reschedule', authDoc.authenticateDoctor, doctorController.re
 
 doctorRoute.patch('/cancelAppointment', authDoc.authenticateDoctor, doctorController.cancelAppointment)
 
+doctorRoute.patch("/editPhoto", authDoc.authenticateDoctor, doctorController.editPhoto)
+
+
 
 
 

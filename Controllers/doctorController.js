@@ -778,7 +778,43 @@ const reschedule = async (req, res) => {
 
 const cancelAppointment = async (req, res) => {
     try {
+        const { appoId, paymentId, userId } = req.body
+        // Delete the payment
+        await Payment.findByIdAndDelete(paymentId);
 
+        await AppointmentModel.findByIdAndUpdate(appoId, { $set: { status: 'CancelledByDoctor' } }, { new: true });
+
+        const data = await AppointmentModel.aggregate([
+            {
+                $lookup: {
+                    from: 'doctors',
+                    localField: 'doctor',
+                    foreignField: '_id',
+                    as: 'doctorDetails',
+                },
+            },
+            {
+                $unwind: '$doctorDetails',
+            },
+        ]);
+        const appointment = data.find(appointment => appointment._id.toString() === appoId);
+
+        // Update the booked field to false in the timeSlots array
+        appointment.doctorDetails.slots[0].timeSlots.forEach(timeSlot => {
+            timeSlot.booked = false;
+        });
+
+        // Save the updated doctorDetails back to the database
+        await Doctor.findByIdAndUpdate(
+            appointment.doctorDetails._id,
+            { $set: { slots: appointment.doctorDetails.slots } },
+            { new: true }
+        );
+
+        // Refund the user's wallet
+        await User.findByIdAndUpdate(userId, { $inc: { wallet: 299 } }, { new: true });
+
+        res.status(200).json({ message: 'Appointment cancelled successfully' });
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ message: 'Internal server error' });
@@ -786,6 +822,28 @@ const cancelAppointment = async (req, res) => {
     }
 }
 
+
+const editPhoto = async (req, res) => {
+    try {
+        const { img, id } = req.body
+        const photoResult = await cloudinary.uploader.upload(img, { folder: 'doctorPhotos' });
+        const doctor = await Doctor.findByIdAndUpdate(
+            id,
+            { $set: { photo: photoResult.secure_url } },
+            { new: true }
+        );
+
+        if (!doctor) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "Profile picture updated successfully", doctor });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: "Internal server error" });
+
+    }
+}
 
 
 
@@ -817,7 +875,8 @@ module.exports = {
     doctorReport,
     getCounts,
     reschedule,
-    cancelAppointment
+    cancelAppointment,
+    editPhoto
 
 
 }
