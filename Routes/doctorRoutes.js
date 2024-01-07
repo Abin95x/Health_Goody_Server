@@ -47,6 +47,8 @@ doctorRoute.patch('/cancelAppointment', authDoc.authenticateDoctor, doctorContro
 
 doctorRoute.patch("/editPhoto", authDoc.authenticateDoctor, doctorController.editPhoto)
 
+doctorRoute.get("/getReviews", authDoc.authenticateDoctor, doctorController.getReviews)
+
 
 
 

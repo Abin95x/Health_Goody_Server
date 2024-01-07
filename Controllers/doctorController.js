@@ -16,6 +16,8 @@ const prescriptionModal = require('../Models/prescriptionModel.js')
 const User = require("../Models/userModel")
 const MedicalReportModel = require("../Models/medicalReportModel.js")
 const Payment = require("../Models/paymentModel.js");
+const mongoose = require("mongoose")
+
 
 
 let otpId
@@ -140,13 +142,13 @@ const doctorLogin = async (req, res) => {
                         }
                     } else {
                         res.status(401).json({
-                            message: "you are blocked by admin"
+                            message: "You are blocked by admin"
                         });
                     }
 
                 } else {
                     res.status(401).json({
-                        message: "admin needs to verify you"
+                        message: "Admin needs to verify you"
                     });
                 }
 
@@ -251,7 +253,7 @@ const resetPass = async (req, res) => {
 
 const specialityName = async (req, res) => {
     try {
-        const data = await Speciality.find()
+        const data = await Speciality.find({ list: true })
         res.status(200).json({ data })
 
     } catch (error) {
@@ -413,9 +415,6 @@ const editProfile = async (req, res) => {
     try {
         const { name, mobile, experience, bio, speciality, id } = req.body;
 
-        // const photoResult = await cloudinary.uploader.upload(photo, { folder: 'doctorPhotos' });
-        // console.log(photoResult);
-
         const doctor = await Doctor.findOneAndUpdate(
             { _id: id },
             {
@@ -425,7 +424,6 @@ const editProfile = async (req, res) => {
                     experience: experience,
                     bio: bio,
                     speciality: speciality,
-                    // photo: photoResult.secure_url,
                 },
 
             },
@@ -452,8 +450,6 @@ const doctorDetails = async (req, res) => {
     }
 }
 
-const mongoose = require("mongoose")
-const appointment = require("../Models/appointmentModel.js")
 
 const appointmentList = async (req, res) => {
     try {
@@ -607,8 +603,7 @@ const addMedicalReport = async (req, res) => {
         const existingMedicalReport = await MedicalReportModel.findOne({ appointmentId: appoId });
 
         if (existingMedicalReport) {
-            // If appointment ID exists, return false
-            return res.status(400).json({ message: 'Medical Repor already added' });
+            return res.status(400).json({ message: 'Medical Report already added' });
         }
 
         const medicalReport = new MedicalReportModel({
@@ -845,6 +840,38 @@ const editPhoto = async (req, res) => {
     }
 }
 
+const getReviews = async (req, res) => {
+    try {
+        const { id } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const doctor = await Doctor.findById(id)
+            .populate('review.postedBy');
+
+        if (!doctor) {
+            return res.status(404).json({ error: 'Doctor not found' });
+        }
+
+        const totalItems = doctor.review.length;
+        const reviews = doctor.review.slice((page - 1) * limit, page * limit);
+
+        const results = {
+            data: reviews,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItems / limit),
+                totalItems: totalItems,
+            },
+        };
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error(error); // Log the error
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 
 
 
@@ -876,8 +903,8 @@ module.exports = {
     getCounts,
     reschedule,
     cancelAppointment,
-    editPhoto
-
+    editPhoto,
+    getReviews
 
 }
 

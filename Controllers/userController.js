@@ -507,7 +507,6 @@ const appointmentList = async (req, res) => {
 const cancelAppointment = async (req, res) => {
     try {
         const { id, userId, paymentId } = req.query;
-
         // Delete the payment
         await Payment.findByIdAndDelete(paymentId);
 
@@ -675,29 +674,39 @@ const walletPayment = async (req, res) => {
 
 const addReview = async (req, res) => {
     try {
-        const { userId, drId, review, rating } = req.body
-        const doctor = await Doctor.findById(drId)
+        const { userId, drId, review, rating } = req.body;
+        const doctor = await Doctor.findById(drId);
+
         if (!doctor) {
-            res.status(404).json({ message: 'Doctor not found' })
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+
+        // Check if the user has already posted a review for this doctor
+        const existingReview = doctor.review.find(
+            (r) => r.postedBy.toString() === userId.toString()
+        );
+
+        if (existingReview) {
+            return res.status(400).json({ message: 'Review already submitted by this user' });
         }
 
         const newReview = {
             text: review,
             star: rating,
             postedBy: userId,
-            postedDate: new Date()
-        }
+            postedDate: new Date(),
+        };
 
         doctor.review.push(newReview);
-        await doctor.save()        // Save the updated doctor object
+        await doctor.save(); // Save the updated doctor object
         res.status(200).json({ message: 'Review added successfully', review: newReview });
 
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ error: 'Internal Server Error' });
-
     }
-}
+};
+
 
 const getReview = async (req, res) => {
     try {

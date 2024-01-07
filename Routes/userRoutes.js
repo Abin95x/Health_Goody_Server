@@ -2,7 +2,7 @@ const express = require("express")
 const userRoute = express()
 const authUser = require("../Middlewares/userAuth")
 const userController = require("../Controllers/userController")
-console.log("route logged")
+
 
 userRoute.post("/userSignup", userController.userRegistration);
 
