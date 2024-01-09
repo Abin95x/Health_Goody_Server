@@ -17,6 +17,7 @@ const User = require("../Models/userModel")
 const MedicalReportModel = require("../Models/medicalReportModel.js")
 const Payment = require("../Models/paymentModel.js");
 const mongoose = require("mongoose")
+const NotificationModel = require('../Models/notificationModel.js')
 
 
 
@@ -358,7 +359,7 @@ const slotCreation = async (req, res) => {
 
         const timeSlots = generateTimeSlots(startTime, endTime, slotDuration);
 
-        const doctor = await Doctor.updateOne(
+        await Doctor.updateOne(
             { _id: id },
             {
                 $push: {
@@ -537,6 +538,13 @@ const createChat = async (req, res) => {
             res.status(200).json({ message: 'Your are connected' })
 
         }
+        const notification = new NotificationModel({
+            text: 'Doctor chat created with you ',
+            userId: userid,
+        })
+
+        await notification.save()
+
         res.status(200).json({ message: 'You are connected' })
 
     } catch (error) {
@@ -571,6 +579,13 @@ const addPriscription = async (req, res) => {
 
         await prescription.save();
 
+        const notification = new NotificationModel({
+            text: 'Your prescription added by doctor',
+            userId: userId,
+        })
+
+        await notification.save()
+
         res.status(200).json({ message: 'Prescription added' });
     } catch (error) {
         console.error(error.message);
@@ -580,13 +595,20 @@ const addPriscription = async (req, res) => {
 
 const markAsDone = async (req, res) => {
     try {
-        const { id } = req.query;
-        // Assuming your AppointmentModel has a 'status' field
+        const { id, userId } = req.query;
+
         const result = await AppointmentModel.findByIdAndUpdate(
             id,
             { $set: { status: 'Done' } },
             { new: true } // Return the updated document
         );
+
+        const notification = new NotificationModel({
+            text: 'Your appointment marked as done ',
+            userId: userId,
+        })
+
+        await notification.save()
 
         res.status(200).json({ success: true, data: result });
     } catch (error) {
@@ -598,7 +620,7 @@ const markAsDone = async (req, res) => {
 
 const addMedicalReport = async (req, res) => {
     try {
-        const { values, appoDate, appoId, drName, email, mobile, userName, } = req.body
+        const { values, appoDate, appoId, drName, userId, userName, } = req.body
 
         const existingMedicalReport = await MedicalReportModel.findOne({ appointmentId: appoId });
 
@@ -621,7 +643,18 @@ const addMedicalReport = async (req, res) => {
             additionalInfo: values.additionalInfo
         })
         await medicalReport.save()
+
+
+        const notification = new NotificationModel({
+            text: 'Your medical report added by doctor ',
+            userId: userId,
+        })
+
+        await notification.save()
+
         res.status(200).json({ message: 'Medical Report added' });
+
+
 
 
     } catch (error) {
@@ -738,7 +771,7 @@ const getCounts = async (req, res) => {
 
 const reschedule = async (req, res) => {
     try {
-        const { date, startTime, endTime, appoId } = req.body;
+        const { date, startTime, endTime, appoId, userId } = req.body;
 
         // Convert start time to 24-hour format
         const startDateTime = new Date(`${date} ${startTime}`);
@@ -761,6 +794,13 @@ const reschedule = async (req, res) => {
         if (!updatedAppointment) {
             return res.status(404).json({ message: 'Appointment not found' });
         }
+
+        const notification = new NotificationModel({
+            text: 'Your appointment has been rescheduled by doctor ',
+            userId: userId,
+        })
+
+        await notification.save()
 
         res.status(200).json({ message: 'Appointment rescheduled successfully' });
     } catch (error) {
@@ -809,6 +849,13 @@ const cancelAppointment = async (req, res) => {
         // Refund the user's wallet
         await User.findByIdAndUpdate(userId, { $inc: { wallet: 299 } }, { new: true });
 
+        const notification = new NotificationModel({
+            text: 'Your appointment cancelled by doctor ',
+            userId: userId,
+        })
+
+        await notification.save()
+
         res.status(200).json({ message: 'Appointment cancelled successfully' });
     } catch (error) {
         console.log(error.message);
@@ -853,6 +900,9 @@ const getReviews = async (req, res) => {
             return res.status(404).json({ error: 'Doctor not found' });
         }
 
+        // Sort reviews by the 'postedDate' property in descending order
+        doctor.review.sort((a, b) => b.postedDate - a.postedDate);
+
         const totalItems = doctor.review.length;
         const reviews = doctor.review.slice((page - 1) * limit, page * limit);
 
@@ -871,8 +921,6 @@ const getReviews = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
-
-
 
 
 

@@ -15,6 +15,7 @@ const AppointmentModel = require("../Models/appointmentModel.js")
 const ChatModal = require("../Models/chatModal.js")
 const PrescriptionModel = require('../Models/prescriptionModel.js')
 const ReportModel = require("../Models/medicalReportModel.js")
+const NotificationModel = require('../Models/notificationModel.js')
 
 let otpId
 
@@ -227,6 +228,13 @@ const setDetails = async (req, res) => {
     try {
         const { name, age, gender, mobile, _id } = req.body
         const user = await User.findOneAndUpdate({ _id: _id }, { $set: { name: name, age: age, gender: gender, mobile: mobile } }, { new: true });
+
+        const notification = new NotificationModel({
+            text: 'Profile details successfully edited',
+            userId: _id,
+        })
+
+        await notification.save()
         res.status(200).json({ message: "User details updated successfully", user });
     } catch (error) {
         console.log(error);
@@ -423,6 +431,13 @@ const makeAppointment = async (req, res) => {
 
         const appointmentData = await appointment.save();
 
+        const notification = new NotificationModel({
+            text: 'Your appointment successfully done',
+            userId: _id,
+        })
+
+        await notification.save()
+
         // Sending Response
         res.status(200).json({ paymentData, appointmentData, message: 'Payment is success' });
 
@@ -545,6 +560,24 @@ const cancelAppointment = async (req, res) => {
         // Refund the user's wallet
         await User.findByIdAndUpdate(userId, { $inc: { wallet: 299 } }, { new: true });
 
+        const cancellationNotification = new NotificationModel({
+            text: 'Your appointment has been cancelled successfully.',
+            userId: userId,
+        });
+
+        // Save the appointment cancellation notification
+        await cancellationNotification.save();
+
+
+        const creditNotification = new NotificationModel({
+            text: 'Amount credited to your wallet.',
+            userId: userId,
+        });
+
+        // Save the amount credited notification
+        await creditNotification.save();
+
+
         res.status(200).json({ message: 'Appointment cancelled successfully' });
     } catch (error) {
         console.error(error.message);
@@ -570,6 +603,14 @@ const createChat = async (req, res) => {
             res.status(200).json({ message: 'Your are connected' })
 
         }
+
+        const notification = new NotificationModel({
+            text: 'Your chat created successfully',
+            userId: userid,
+        })
+
+        await notification.save()
+
         res.status(200).json({ message: 'You are connected' })
 
     } catch (error) {
@@ -662,6 +703,13 @@ const walletPayment = async (req, res) => {
 
             const appointmentData = await appointment.save();
 
+            const notification = new NotificationModel({
+                text: 'Your appointment successfully done',
+                userId: _id,
+            })
+
+            await notification.save()
+
             res.status(201).json({ paymentData, appointmentData, message: 'Payment is success' });
         }
 
@@ -699,7 +747,16 @@ const addReview = async (req, res) => {
 
         doctor.review.push(newReview);
         await doctor.save(); // Save the updated doctor object
+
+        const notification = new NotificationModel({
+            text: 'Your review successfuly added',
+            userId: userId,
+        })
+
+        await notification.save()
+
         res.status(200).json({ message: 'Review added successfully', review: newReview });
+
 
     } catch (error) {
         console.log(error.message);
@@ -716,6 +773,14 @@ const getReview = async (req, res) => {
             model: 'User',
             select: 'name email photo' // You can choose which user details to select
         });
+
+        if (!doctor) {
+            return res.status(404).json({ error: 'Doctor not found' });
+        }
+
+        // Sort reviews by the 'postedDate' property in descending order
+        doctor.review.sort((a, b) => b.postedDate - a.postedDate);
+
         const reviewDetails = doctor.review.map(review => ({
             text: review.text,
             star: review.star,
@@ -728,13 +793,12 @@ const getReview = async (req, res) => {
         }));
 
         res.status(200).json({ reviews: reviewDetails });
-
-
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 
 const editPhoto = async (req, res) => {
@@ -751,6 +815,13 @@ const editPhoto = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        const notification = new NotificationModel({
+            text: 'Profile picture updated successfully',
+            userId: _id,
+        })
+
+        await notification.save()
+
         res.status(200).json({ message: "Profile picture updated successfully", user });
     } catch (error) {
         console.log(error.message);
@@ -759,6 +830,32 @@ const editPhoto = async (req, res) => {
     }
 }
 
+const getNotification = async (req, res) => {
+    try {
+        const { id } = req.query;
+        const page = req.query.page || 1;
+        const perPage = 10;
+
+        const data = await NotificationModel.find({ userId: id })
+            .skip((page - 1) * perPage)
+            .limit(perPage)
+            .sort({ createdAt: -1 });
+
+        const totalNotifications = await NotificationModel.countDocuments({ userId: id });
+        const totalPages = Math.ceil(totalNotifications / perPage);
+
+        if (!data) {
+            return res.status(404).json({ message: 'Notification not found' });
+        }
+
+        res.status(200).json({ notifications: data, totalPages });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+module.exports = { getNotification };
 
 
 
@@ -792,5 +889,6 @@ module.exports = {
     addReview,
     getReview,
     editPhoto,
+    getNotification,
 }
 

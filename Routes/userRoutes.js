@@ -50,6 +50,9 @@ userRoute.get("/getReview", authUser.authenticateUser, userController.getReview)
 
 userRoute.patch("/editPhoto", authUser.authenticateUser, userController.editPhoto)
 
+userRoute.get("/getNotification", authUser.authenticateUser, userController.getNotification)
+
+
 
 
 
