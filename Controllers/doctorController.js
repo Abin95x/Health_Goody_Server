@@ -539,7 +539,7 @@ const createChat = async (req, res) => {
 
         }
         const notification = new NotificationModel({
-            text: 'Doctor chat created with you ',
+            text: 'Doctor created a chat room with you ',
             userId: userid,
         })
 
