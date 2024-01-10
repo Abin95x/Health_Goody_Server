@@ -26,7 +26,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/",
+        url: "https://healthgoody.vercel.app",
       },
     ],
   },
@@ -37,7 +37,7 @@ const options = {
 // Enable CORS for specific origin and methods
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://healthgoody.vercel.app",
     methods: ["GET", "POST", "PUT", "PATCH"],
     credentials: true, // Set to true if you need to include credentials
   })
