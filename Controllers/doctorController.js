@@ -197,7 +197,7 @@ const forgotPass = async (req, res) => {
             from: process.env.EMAIL,
             to: email,
             subject: "Forgot password",
-            text: `http://localhost:3000/doctor/resetpassword/${isDoctor._id}/${token}`,
+            text: `https://healthgoody.vercel.app/doctor/resetpassword/${isDoctor._id}/${token}`,
         };
 
         transporter.sendMail(mailOptions, function (error, info) {
