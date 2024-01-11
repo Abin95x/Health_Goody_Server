@@ -370,6 +370,7 @@ const makePayment = async (req, res) => {
             mode: 'payment',
             success_url: `https://healthgoody.vercel.app/success?status=true&success&_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
             cancel_url: `https://healthgoody.vercel.app/`,
+
         });
 
 
