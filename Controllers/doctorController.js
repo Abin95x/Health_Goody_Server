@@ -305,6 +305,8 @@ const generateTimeSlots = (start, end, duration) => {
 };
 
 
+
+
 const slotCreation = async (req, res) => {
     try {
         const { startTime, endTime, slotDuration, date } = req.body.formData;
@@ -318,15 +320,16 @@ const slotCreation = async (req, res) => {
         const id = req.body.id;
 
         // Ensure date is a valid JavaScript Date object
-        const parsedDate = new Date(date);
+        const parsedDate = moment.tz(date, 'YYYY-MM-DD', 'your-timezone').toDate();
 
-        const currentDate = new Date();
+        const currentDate = moment().tz('your-timezone');
         if (parsedDate < currentDate) {
             return res.status(400).send({
                 success: false,
                 message: "Invalid date. Slot creation allowed only for future dates.",
             });
         }
+
         // Ensure startTime is less than endTime
         if (startTime >= endTime) {
             return res.status(400).send({
@@ -364,7 +367,7 @@ const slotCreation = async (req, res) => {
             {
                 $push: {
                     slots: {
-                        date: parsedDate, // Use the parsed date here
+                        date: parsedDate,
                         startTime,
                         endTime,
                         slotDuration,
@@ -373,7 +376,6 @@ const slotCreation = async (req, res) => {
                 },
             }
         );
-
 
         res.status(200).send({
             success: true,
@@ -385,6 +387,7 @@ const slotCreation = async (req, res) => {
         return res.status(500).json({ status: "Internal Server Error" });
     }
 };
+
 
 
 
