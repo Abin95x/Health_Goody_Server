@@ -309,7 +309,7 @@ const slotCreation = async (req, res) => {
     try {
         const { startTime, endTime, slotDuration, date } = req.body.formData;
         if (!date) {
-            return res.status(400).send({
+            return res.status(200).send({
                 success: false,
                 message: "Invalid date.",
             });
@@ -322,14 +322,14 @@ const slotCreation = async (req, res) => {
 
         const currentDate = new Date();
         if (parsedDate < currentDate) {
-            return res.status(400).send({
+            return res.status(200).send({
                 success: false,
                 message: "Invalid date. Slot creation allowed only for future dates.",
             });
         }
         // Ensure startTime is less than endTime
         if (startTime >= endTime) {
-            return res.status(400).send({
+            return res.status(200).send({
                 success: false,
                 message: "Invalid time range. Starting time must be less than ending time.",
             });
