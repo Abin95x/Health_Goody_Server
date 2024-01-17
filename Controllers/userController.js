@@ -114,7 +114,9 @@ const userLogin = async (req, res) => {
                 if (emailExist.is_blocked === false) {
                     const passCheck = await bcrypt.compare(password, emailExist.password)
                     if (passCheck) {
-                        const usertoken = jwt.sign({ userId: emailExist._id }, process.env.SECRET_KEY_USER, { expiresIn: "1h" })
+                        const usertoken = jwt.sign({ userId: emailExist._id ,role:'user' }, 
+                            process.env.SECRET_KEY_USER, 
+                            { expiresIn: "1h" })
                         res.header('usertoken', usertoken);
 
                         // res.json({ userData: emailExist, token, status: true })

@@ -12,32 +12,12 @@ dbconnect.dbconnect()
 app.use(express.json({ limit: "20mb" }))
 app.use(express.urlencoded({ limit: "20mb", extended: true }))
 
-const options = {
-  definition: {
-    openapi: "3.0.3",
-    info: {
-      title: "API",
-      version: "0.1.0",
-      description:
-        "API for the purpose of understanding each routes specification.",
-      contact: {
-        name: "HEALTH GOODY",
-      },
-    },
-    servers: [
-      {
-        url: "https://healthgoody.vercel.app",
-      },
-    ],
-  },
-  apis: ["./Routes/*.js"],
-};
-
 
 // Enable CORS for specific origin and methods
 app.use(
   cors({
     origin: "https://healthgoody.vercel.app",
+    // origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "PATCH"],
     credentials: true, // Set to true if you need to include credentials
   })

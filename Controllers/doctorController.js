@@ -133,7 +133,10 @@ const doctorLogin = async (req, res) => {
                     if (emailExist.is_blocked === false) {
                         const passCheck = await bcrypt.compare(password, emailExist.password)
                         if (passCheck) {
-                            const doctortoken = jwt.sign({ doctorId: emailExist._id }, process.env.SECRET_KEY_DOCTOR, { expiresIn: "1h" })
+                            const doctortoken = jwt.sign({ doctorId: emailExist._id ,role:'doctor'}, 
+                            process.env.SECRET_KEY_DOCTOR,
+                             { expiresIn: "1h" })
+                             
                             res.header('doctortoken', doctortoken);
                             res.status(200).json({ doctorData: emailExist, doctortoken, message: `Welome ${emailExist.name}` });
                         } else {

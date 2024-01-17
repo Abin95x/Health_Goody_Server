@@ -20,7 +20,7 @@ const adminLogin = async (req, res) => {
             const passCheck = await bcrypt.compare(password, adminPassword);
 
             if (passCheck) {
-                const admintoken = jwt.sign({ username }, process.env.SECRET_KEY_ADMIN, { expiresIn: "1h" });
+                const admintoken = jwt.sign({ username ,role:'admin' }, process.env.SECRET_KEY_ADMIN, { expiresIn: "1h" });
                 res.header('admintoken', admintoken);
                 res.status(200).json({ admintoken, message: `Welcome ${username}` });
             } else {
