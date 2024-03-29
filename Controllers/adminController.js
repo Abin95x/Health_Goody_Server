@@ -343,7 +343,7 @@ const editSpeciality = async (req, res) => {
         const id = req.body.values.id;
         const editedName = req.body.values.edit;
         const photo = req.body.values.photo;
-
+    
         if (!id || !editedName) {
             return res.status(400).json({ message: 'Missing required parameters' });
         }
@@ -353,6 +353,10 @@ const editSpeciality = async (req, res) => {
         });
 
         if (existing) {
+            if (photo) {
+            const photoResult = await cloudinary.uploader.upload(photo, { folder: 'specialitysvg' });
+            photoUrl = photoResult.secure_url;
+        }
             return res.status(400).json({ message: 'Speciality already exists' });
         }
 

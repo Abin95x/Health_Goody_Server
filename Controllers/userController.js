@@ -360,7 +360,6 @@ const makePayment = async (req, res) => {
 
         const selectedDate = moment(date);
 
-
         const session = await stripe.checkout.sessions.create({
             billing_address_collection: 'auto',
             line_items: [
