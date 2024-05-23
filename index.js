@@ -16,8 +16,8 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }))
 // Enable CORS for specific origin and methods
 app.use(
   cors({
-    origin: "https://healthgoody.vercel.app",
-    // origin: "http://localhost:3000",
+    // origin: "https://healthgoody.vercel.app",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "PATCH"],
     credentials: true, // Set to true if you need to include credentials
   })

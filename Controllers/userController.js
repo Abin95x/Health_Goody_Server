@@ -36,6 +36,7 @@ const userRegistration = async (req, res) => {
                 password: spassword,
                 photo: photoResult.secure_url
             })
+
             const userData = await user.save()
             otpId = await sendEmail(userData.name, userData.email, userData.id);
             res.status(201).json({
@@ -108,6 +109,8 @@ const resendOtp = async (req, res) => {
 const userLogin = async (req, res) => {
     try {
         const { email, password } = req.body
+        console.log(email);
+        console.log(password);
         const emailExist = await User.findOne({ email: email })
         if (emailExist) {
             if (emailExist.otp_verified) {
@@ -369,8 +372,10 @@ const makePayment = async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `https://healthgoody.vercel.app/success?status=true&success&_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
-            cancel_url: `https://healthgoody.vercel.app/`,
+            // success_url: `https://healthgoody.vercel.app/success?status=true&success&_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
+            // cancel_url: `https://healthgoody.vercel.app/`,
+            success_url: `http://localhost:3000/success?status=true&success&_id=${_id}&drId=${drId}&select=${select}&date=${selectedDate}`,
+            cancel_url: `http://localhost:3000/`,
 
         });
 
