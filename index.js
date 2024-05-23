@@ -4,6 +4,7 @@ const socketConnection = require("./socketIo")
 require("dotenv").config()
 const cors = require('cors')
 const PORT = process.env.PORT || 3001;
+const frontURL = process.env.FRONT_END_URL
 const http = require("http")
 
 const dbconnect = require("./Config/dbConfig")
@@ -17,7 +18,7 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }))
 app.use(
   cors({
     // origin: "https://healthgoody.vercel.app",
-    origin: "http://localhost:3000",
+    origin: frontURL,
     methods: ["GET", "POST", "PUT", "PATCH"],
     credentials: true, // Set to true if you need to include credentials
   })

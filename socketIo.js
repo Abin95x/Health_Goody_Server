@@ -1,10 +1,13 @@
 const { Server } = require("socket.io");
+require("dotenv").config()
+const frontURL = process.env.FRONT_END_URL
+
 
 function socketConnection(server) {
   const io = new Server(server, {
     cors: {
       // origin: "https://healthgoody.vercel.app",
-      origin: "http://localhost:3000",
+      origin: frontURL,
       methods: ["GET", "POST"],
     },
   });
