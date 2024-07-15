@@ -311,6 +311,7 @@ const generateTimeSlots = (start, end, duration) => {
 const slotCreation = async (req, res) => {
     try {
         const { startTime, endTime, slotDuration, date } = req.body.formData;
+
         if (!date) {
             return res.status(200).send({
                 success: false,
@@ -319,10 +320,14 @@ const slotCreation = async (req, res) => {
         }
 
         const id = req.body.id;
-
+console.log(date);
+        // const x = new Date(date);
+        // x.setDate(x.getDate() + 1);
+        // const updatedDateString = x.toISOString();
+        // console.log(updatedDateString);
         // Ensure date is a valid JavaScript Date object
         const parsedDate = new Date(date);
-
+        console.log(parsedDate);
         const currentDate = new Date();
         if (parsedDate < currentDate) {
             return res.status(200).send({
